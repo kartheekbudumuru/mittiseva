@@ -625,6 +625,176 @@ function initReport() {
     r.ferts.map(f=>`<div style="font-size:13px;padding:3px 0">• ${f.name} — ${f.dose}</div>`).join('') +
     r.crops.map(c=>`<div style="font-size:13px;padding:3px 0">• ${c.icon} ${c.name} (${c.season})</div>`).join('');
 }
+
+function downloadReport() {
+  const r = analysisResult || analyseSoil(soilValues);
+  const col = scoreColor(r.score);
+  const name    = (currentProfile && currentProfile.full_name) || document.getElementById('reportFarmerName')?.textContent || 'Farmer';
+  const village = (currentProfile && currentProfile.village)   || document.getElementById('reportFarmerVillage')?.textContent || '—';
+  const date    = new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'long',year:'numeric'});
+  const scoreText = scoreLabel(r.score) + ' Soil Health';
+
+  const readingsRows = [
+    ['pH',             soilValues.ph],
+    ['Nitrogen',       soilValues.n   + ' kg/ha'],
+    ['Phosphorus',     soilValues.p   + ' kg/ha'],
+    ['Potassium',      soilValues.k   + ' kg/ha'],
+    ['Moisture',       soilValues.moisture + '%'],
+    ['Organic Carbon', soilValues.oc  + '%'],
+  ].map(([l,v]) => `
+    <tr>
+      <td style="padding:9px 0;color:#4a7c2f;font-weight:500;font-size:13.5px;border-bottom:1px solid #f0ebe4;">${l}</td>
+      <td style="padding:9px 0;text-align:right;font-weight:700;font-size:13.5px;color:#2d1b0e;border-bottom:1px solid #f0ebe4;">${v}</td>
+    </tr>`).join('');
+
+  const fertRows = r.ferts.map(f =>
+    `<li style="margin-bottom:5px;font-size:13.5px;color:#2d1b0e;">
+       <span style="color:#4a7c2f;font-weight:600;">${f.name}</span> — ${f.dose}
+     </li>`).join('');
+  const cropRows = r.crops.map(c =>
+    `<li style="margin-bottom:5px;font-size:13.5px;color:#2d1b0e;">
+       ${c.icon} <span style="color:#4a7c2f;font-weight:600;">${c.name}</span> (${c.season})
+     </li>`).join('');
+
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>MittiSeva Soil Test Certificate</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Inter',sans-serif;background:#f5f0e8;display:flex;justify-content:center;align-items:flex-start;min-height:100vh;padding:32px 16px;}
+  .certificate{background:#fff;width:680px;border-radius:18px;overflow:hidden;box-shadow:0 8px 48px rgba(45,27,14,.18);}
+  .cert-header{background:linear-gradient(135deg,#2d5016 0%,#3d6b1e 60%,#4a7c2f 100%);padding:32px 36px 28px;position:relative;overflow:hidden;}
+  .cert-header::before{content:'';position:absolute;top:-40px;right:-40px;width:200px;height:200px;background:rgba(255,255,255,.04);border-radius:50%;}
+  .cert-header::after{content:'';position:absolute;bottom:-60px;left:-20px;width:160px;height:160px;background:rgba(255,255,255,.03);border-radius:50%;}
+  .cert-tag{color:#c9a84c;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;}
+  .cert-title{color:#fff;font-family:'Playfair Display',serif;font-size:28px;font-weight:700;margin-bottom:6px;}
+  .cert-gov{color:rgba(245,240,232,.72);font-size:12.5px;}
+  .cert-body{padding:32px 36px;}
+  .section{margin-bottom:26px;}
+  .sec-label{font-size:10.5px;font-weight:700;letter-spacing:1.2px;color:#8b6a3a;text-transform:uppercase;margin-bottom:12px;padding-bottom:4px;border-bottom:1.5px solid #f0ebe4;}
+  table{width:100%;border-collapse:collapse;}
+  td{vertical-align:middle;}
+  .score-wrap{display:flex;align-items:center;gap:18px;}
+  .score-circle{width:64px;height:64px;border-radius:50%;background:${col};display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Playfair Display',serif;font-size:24px;font-weight:700;flex-shrink:0;box-shadow:0 4px 16px ${col}55;}
+  .score-label{font-weight:700;font-size:17px;color:#2d1b0e;margin-bottom:3px;}
+  .score-sub{font-size:12px;color:#8b6a3a;}
+  ul{list-style:none;padding:0;}
+  .stamp-wrap{display:flex;justify-content:flex-end;margin-top:24px;padding-top:20px;border-top:1.5px solid #f0ebe4;}
+  .stamp{position:relative;width:130px;height:130px;display:flex;align-items:center;justify-content:center;}
+  .stamp-circle{position:absolute;inset:0;border-radius:50%;border:3px solid #2d5016;opacity:.85;}
+  .stamp-inner{position:absolute;inset:10px;border-radius:50%;border:1.5px dashed #4a7c2f;opacity:.6;}
+  .stamp-content{text-align:center;z-index:1;}
+  .stamp-icon{font-size:28px;display:block;margin-bottom:2px;}
+  .stamp-approved{font-size:9px;font-weight:700;letter-spacing:1.5px;color:#2d5016;text-transform:uppercase;line-height:1.4;}
+  .stamp-brand{font-family:'Playfair Display',serif;font-size:13px;font-weight:700;color:#2d5016;line-height:1.3;}
+  .stamp-rotate{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;transform:rotate(-15deg);opacity:.08;font-size:11px;font-weight:700;color:#2d5016;letter-spacing:1px;text-transform:uppercase;white-space:nowrap;}
+  .footer{background:#f7f3ec;padding:14px 36px;display:flex;justify-content:space-between;align-items:center;border-top:1px solid #e8e0d0;}
+  .footer-left{font-size:11px;color:#8b6a3a;}
+  .footer-right{font-size:11px;color:#4a7c2f;font-weight:600;}
+  @media print{
+    body{background:none;padding:0;}
+    .certificate{box-shadow:none;border-radius:0;width:100%;}
+    .no-print{display:none!important;}
+  }
+</style>
+</head>
+<body>
+<div class="certificate">
+
+  <!-- Header -->
+  <div class="cert-header">
+    <div class="cert-tag">🇮🇳 Soil Test Certificate</div>
+    <div class="cert-title">MittiSeva · మిట్టిసేవ</div>
+    <div class="cert-gov">Government of Andhra Pradesh · Agriculture Dept.</div>
+  </div>
+
+  <!-- Body -->
+  <div class="cert-body">
+
+    <!-- Farmer Details -->
+    <div class="section">
+      <div class="sec-label">Farmer Details</div>
+      <table>
+        <tr>
+          <td style="padding:8px 0;color:#8b6a3a;font-size:13.5px;border-bottom:1px solid #f0ebe4;">Name</td>
+          <td style="padding:8px 0;text-align:right;font-weight:700;font-size:13.5px;color:#2d1b0e;border-bottom:1px solid #f0ebe4;">${name}</td>
+        </tr>
+        <tr>
+          <td style="padding:8px 0;color:#8b6a3a;font-size:13.5px;border-bottom:1px solid #f0ebe4;">Village</td>
+          <td style="padding:8px 0;text-align:right;font-weight:700;font-size:13.5px;color:#2d1b0e;border-bottom:1px solid #f0ebe4;">${village}</td>
+        </tr>
+        <tr>
+          <td style="padding:8px 0;color:#8b6a3a;font-size:13.5px;">Test Date</td>
+          <td style="padding:8px 0;text-align:right;font-weight:700;font-size:13.5px;color:#2d1b0e;">${date}</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- Health Score -->
+    <div class="section">
+      <div class="sec-label">Health Score</div>
+      <div class="score-wrap">
+        <div class="score-circle">${r.score}</div>
+        <div>
+          <div class="score-label">${scoreText}</div>
+          <div class="score-sub">Out of 100 points</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Soil Readings -->
+    <div class="section">
+      <div class="sec-label">Soil Readings</div>
+      <table>${readingsRows}</table>
+    </div>
+
+    <!-- Recommendations -->
+    <div class="section">
+      <div class="sec-label">Recommendations</div>
+      <ul>${fertRows}${cropRows}</ul>
+    </div>
+
+    <!-- Approved Stamp -->
+    <div class="stamp-wrap">
+      <div class="stamp">
+        <div class="stamp-circle"></div>
+        <div class="stamp-inner"></div>
+        <div class="stamp-rotate">MittiSeva · Approved · Certified ·</div>
+        <div class="stamp-content">
+          <span class="stamp-icon">🌱</span>
+          <div class="stamp-approved">Approved by</div>
+          <div class="stamp-brand">MittiSeva</div>
+          <div class="stamp-approved" style="margin-top:2px;font-size:8px;opacity:.7;">మిట్టిసేవ</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <div class="footer-left">Generated by MittiSeva · soilhealth-analysis.vercel.app</div>
+    <div class="footer-right">✓ Certified Analysis</div>
+  </div>
+
+</div>
+
+<div class="no-print" style="text-align:center;margin-top:22px;">
+  <button onclick="window.print()" style="background:#2d5016;color:#fff;border:none;padding:13px 36px;border-radius:10px;font-size:15px;font-family:'Inter',sans-serif;font-weight:600;cursor:pointer;box-shadow:0 4px 16px rgba(45,80,22,.3);">
+    ⬇ Save as PDF / Print
+  </button>
+</div>
+</body>
+</html>`;
+
+  const win = window.open('', '_blank', 'width=760,height=920,scrollbars=yes');
+  win.document.write(html);
+  win.document.close();
+}
+
 function shareReport() {
   const r = analysisResult || analyseSoil(soilValues);
   if(navigator.share) navigator.share({title:'My Soil Report — MittiSeva',text:`Soil Health Score: ${r.score}/100\nVisit MittiSeva for full analysis.`});
