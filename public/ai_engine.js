@@ -11,6 +11,12 @@ const MIN_GAP_MS     = 1500; // minimum ms between sends
 // ── In-memory conversation history (multi-turn) ──
 const chatHistory = { mobile: [], full: [] };
 
+// ── Reset all in-memory chat history ──
+function resetChatHistory() {
+  chatHistory.mobile.length = 0;
+  chatHistory.full.length   = 0;
+}
+
 // ── Context Injection ──
 function getSoilContext() {
   const profile    = window.currentProfile;

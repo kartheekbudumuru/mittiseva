@@ -1341,14 +1341,32 @@ async function loadChatHistory() {
 }
 
 async function clearChatHistory() {
-  if (!supabase || !currentUser) return;
   if (!confirm('Clear all chat history?')) return;
-  try {
-    await supabase.from('chat_messages').delete().eq('farmer_id', currentUser.id);
-    if (typeof resetChatHistory === 'function') resetChatHistory();
-    await loadChatHistory();
-  } catch (e) {
-    console.error('Clearing chat history failed:', e);
+
+  // 1. Always clear in-memory history (defined in ai_engine.js)
+  if (typeof resetChatHistory === 'function') resetChatHistory();
+
+  // 2. Always clear the full chat panel DOM
+  const fullMsgs = document.getElementById('chatMsgsFull');
+  if (fullMsgs) {
+    fullMsgs.innerHTML = '';
+    const welcome = document.createElement('div');
+    welcome.className = 'msg-ai';
+    welcome.id = 'chat-welcome-full';
+    welcome.textContent =
+      currentLang === 'te' ? 'నమస్తే! నేను కృషి AI. మట్టి, పంటలు లేదా ఎరువుల గురించి నన్ను ఏదైనా అడగండి. నేను మీకు సహాయం చేయడానికి ఇక్కడ ఉన్నాను! 🌿' :
+      currentLang === 'hi' ? 'नमस्ते! मैं कृषि AI हूँ। मिट्टी, फसलों या उर्वरकों के बारे में कुछ भी पूछें। मैं आपकी मदद के लिए यहाँ हूँ! 🌿' :
+      "Namaste! I'm Krishi AI. Ask me anything about soil, crops, or fertilizers. I'm here to help! 🌿";
+    fullMsgs.appendChild(welcome);
+  }
+
+  // 3. Delete from Supabase only if logged in
+  if (supabase && currentUser) {
+    try {
+      await supabase.from('chat_messages').delete().eq('farmer_id', currentUser.id);
+    } catch (e) {
+      console.error('Clearing chat history from DB failed:', e);
+    }
   }
 }
 
