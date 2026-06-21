@@ -4,7 +4,7 @@
 // ═══════════════════════════════════════════════════════════
 
 // ── Gemini API Configuration ──
-const GEMINI_API_KEY = window.GEMINI_API_KEY || 'YOUR_GEMINI_API_KEY_HERE';
+const GEMINI_API_KEY = ''; // Key is stored securely on the backend server — never expose here
 const useBackendProxy = true; // Always proxy via backend to prevent leaking API keys on the frontend
 
 // Primary + fallback models (fallback has separate, higher quota)
