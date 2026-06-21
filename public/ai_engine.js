@@ -101,6 +101,20 @@ async function fetchWithRetry(model, body, maxRetries = 3) {
 
     // On 429: throw a proper Error with metadata attached
     if (status === 429) {
+      // Check for hard quota limit to avoid useless retries
+      let isHardQuota = false;
+      try {
+        const errObj = JSON.parse(errText);
+        const errMsg = errObj?.error?.message || '';
+        if (errMsg.toLowerCase().includes('quota') || errMsg.toLowerCase().includes('limit: 0') || errMsg.toLowerCase().includes('exhausted')) {
+          isHardQuota = true;
+        }
+      } catch (_) {}
+
+      if (isHardQuota) {
+        throw new Error('QUOTA_EXHAUSTED');
+      }
+
       const retryAfter = parseInt(response.headers.get('Retry-After') || '0', 10);
       const waitMs = retryAfter > 0 ? retryAfter * 1000 : (delays[attempt] || 40000);
 
@@ -113,6 +127,7 @@ async function fetchWithRetry(model, body, maxRetries = 3) {
       }
       throw new Error(`Rate limit exceeded. Please wait ${Math.ceil((delays[2]||40000)/1000)}s and try again.`);
     }
+
 
     // On 503 / 500: retry silently
     if ((status === 503 || status === 500) && attempt < maxRetries) {
@@ -352,19 +367,23 @@ async function krishiSend(inputId, msgsContainerId, chatId) {
 
     // Map to user-friendly messages
     let errorMsg;
+    const isTe = window.currentLang === 'te';
     if (msg.includes('API_KEY_INVALID') || msg.includes('400')) {
-      errorMsg = '❌ Invalid Gemini API key. Please check config.js.';
+      errorMsg = isTe ? '❌ చెల్లని జెమినీ API కీ.' : '❌ Invalid Gemini API key. Please check config.js.';
     } else if (msg.includes('403')) {
-      errorMsg = '❌ API key not authorized. Check Google AI Studio settings.';
+      errorMsg = isTe ? '❌ కీ ప్రామాణీకరించబడలేదు.' : '❌ API key not authorized. Check Google AI Studio settings.';
+    } else if (msg.includes('QUOTA_EXHAUSTED')) {
+      errorMsg = isTe ? '⏳ కృషి AI తాత్కాలికంగా బిజీగా ఉంది. దయచేసి ఒక నిమిషం తర్వాత మళ్లీ ప్రయత్నించండి.' : '⏳ Krishi AI is temporarily busy. Please try again in a minute.';
     } else if (msg.includes('RATE_LIMIT') || msg.includes('429') || msg.includes('Rate limit')) {
-      errorMsg = '⏳ Rate limit reached. Please wait 1–2 minutes. (Free Gemini = 15 requests/min)';
+      errorMsg = isTe ? '⏳ అభ్యర్థనల పరిమితి దాటింది. దయచేసి 1-2 నిమిషాలు వేచి ఉండండి.' : '⏳ Rate limit reached. Please wait 1–2 minutes. (Free Gemini = 15 requests/min)';
     } else if (msg.includes('404')) {
-      errorMsg = '❌ AI model not found. Please hard-reload the page (Ctrl+Shift+R).';
+      errorMsg = isTe ? '❌ మోడల్ కనుగొనబడలేదు.' : '❌ AI model not found. Please hard-reload the page (Ctrl+Shift+R).';
     } else if (!navigator.onLine) {
-      errorMsg = '📡 No internet connection. Please check your network.';
+      errorMsg = isTe ? '📡 ఇంటర్నెట్ కనెక్షన్ లేదు.' : '📡 No internet connection. Please check your network.';
     } else {
-      errorMsg = `⚠️ Krishi AI error: ${msg.substring(0, 150)}`;
+      errorMsg = isTe ? `⚠️ లోపం సంభవించింది: ${msg.substring(0, 100)}` : `⚠️ Krishi AI error: ${msg.substring(0, 150)}`;
     }
+
 
     appendMsgUI('ai', errorMsg, msgsContainerId);
     console.error('[KrishiAI]', err);
