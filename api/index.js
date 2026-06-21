@@ -26,8 +26,10 @@ app.post("/api/chat/stream", async (req, res) => {
 
   const models = [
     "deepseek/deepseek-chat-v3-0324:free",
+    "deepseek/deepseek-chat",
     "qwen/qwen3-32b:free",
-    "meta-llama/llama-3.3-70b-instruct:free"
+    "meta-llama/llama-3.3-70b-instruct:free",
+    "openrouter/free"
   ];
 
   let response = null;
@@ -117,8 +119,10 @@ app.post("/api/chat", async (req, res) => {
 
   const models = [
     "deepseek/deepseek-chat-v3-0324:free",
+    "deepseek/deepseek-chat",
     "qwen/qwen3-32b:free",
-    "meta-llama/llama-3.3-70b-instruct:free"
+    "meta-llama/llama-3.3-70b-instruct:free",
+    "openrouter/free"
   ];
 
   let response = null;
