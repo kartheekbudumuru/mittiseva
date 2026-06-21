@@ -308,11 +308,26 @@ function getOfflineFallbackMessage(userMessage) {
     const isFertilizer = msg.includes('fertilizer') || msg.includes('urea') || msg.includes('dap') || msg.includes('mop') || msg.includes('ఎరువు') || msg.includes('nutrient');
     const isCrops = msg.includes('crop') || msg.includes('paddy') || msg.includes('grow') || msg.includes('sow') || msg.includes('పంట') || msg.includes('cotton') || msg.includes('groundnut');
     const isHello = msg.includes('hello') || msg.includes('hi') || msg.includes('namaste') || msg.includes('నమస్తే') || msg.includes('హలో');
+    const isYellowLeaves = msg.includes('yellow') || msg.includes('ఆకుపచ్చ') || msg.includes('పసుపు') || msg.includes('leaf') || msg.includes('leaves');
+    const isPhDetail = msg.includes('ph') || msg.includes('acid') || msg.includes('alkaline');
+    const isOrganic = msg.includes('organic') || msg.includes('compost') || msg.includes('manure') || msg.includes('సేంద్రీయ');
+    const isWater = msg.includes('water') || msg.includes('irrigation') || msg.includes('drip') || msg.includes('నీరు') || msg.includes('తేమ');
+    const isPest = msg.includes('pest') || msg.includes('disease') || msg.includes('insect') || msg.includes('పురుగు') || msg.includes('తెగులు');
 
     if (isTe) {
       let advice = `${busyMsg}\n\n🤖 **స్థానిక కృషి సలహాదారు (ఆఫ్‌లైన్ మోడ్):**\n`;
       
-      if (isSoilHealth) {
+      if (isYellowLeaves) {
+        advice += `• **ఆకులు పసుపు రంగులోకి మారడం:** ఇది సాధారణంగా నత్రజని లోపాన్ని (Nitrogen deficiency) సూచిస్తుంది. మీ మట్టిలో నత్రజని స్థాయి: ${window.soilValues.n} kg/ha (ఇది ${res.nS === 'low' ? 'చాలా తక్కువ' : 'సముచితం'}). లోపం ఉంటే, తగిన మోతాదులో యూరియా వేయండి.\n`;
+      } else if (isPhDetail) {
+        advice += `• **pH స్థాయి చికిత్స:** మీ మట్టి pH విలువ: ${window.soilValues.ph}. pH విలువ 6.0 కన్నా తక్కువ ఉంటే మట్టి ఆమ్లత్వంతో ఉంది, సున్నం (lime) కలపండి. pH 7.5 కన్నా ఎక్కువ ఉంటే క్షార గుణం కలదు, జిప్సం (gypsum) వేయండి.\n`;
+      } else if (isOrganic) {
+        advice += `• **సేంద్రీయ కార్బన్:** మీ సేంద్రీయ కార్బన్ శాతం: ${window.soilValues.oc}%. భూసారాన్ని పెంచడానికి హెక్టారుకు 3-4 టన్నుల సేంద్రీయ ఎరువు లేదా కంపోస్ట్ కలపడం లేదా పచ్చిరొట్ట ఎరువుల సాగు (green manuring) చేయడం మంచిది.\n`;
+      } else if (isWater) {
+        advice += `• **నీటి యాజమాన్యం:** మీ మట్టి తేమ: ${window.soilValues.moisture}%. వరి వంటి పంటలకు క్రమం తప్పకుండా నీరు పెట్టండి. పత్తి, వేరుశనగ పంటలకు తక్కువ నీటితో కూడిన డ్రిప్ లేదా స్ప్రింక్లర్ పద్ధతి ఉపయోగించండి.\n`;
+      } else if (isPest) {
+        advice += `• **పురుగుల నివారణ:** రసాయన మందులకు బదులుగా వేప నూనె లేదా వేప కషాయం వంటి సహజ నివారణలను ఉపయోగించండి. పురుగుల ఉధృతిని తగ్గించడానికి పంటల మార్పిడి (crop rotation) పాటించండి.\n`;
+      } else if (isSoilHealth) {
         advice += `• మీ మట్టి ఆరోగ్య స్కోరు **100 కి గాను ${res.score} పాయింట్లు**. మీ మట్టి యొక్క పోషకాల స్థాయిలు:\n`;
         advice += `  - pH విలువ: ${window.soilValues.ph} (${res.phS === 'optimal' ? 'సముచితం' : res.phS === 'low' ? 'తక్కువ' : 'ఎక్కువ'})\n`;
         advice += `  - నత్రజని (N): ${window.soilValues.n} kg/ha (${res.nS === 'optimal' ? 'సముచితం' : res.nS === 'low' ? 'తక్కువ' : 'ఎక్కువ'})\n`;
@@ -340,7 +355,17 @@ function getOfflineFallbackMessage(userMessage) {
     } else {
       let advice = `${busyMsg}\n\n🤖 **Krishi Local Expert (Offline Mode):**\n`;
       
-      if (isSoilHealth) {
+      if (isYellowLeaves) {
+        advice += `• **Yellowing of Leaves:** This typically indicates Nitrogen deficiency. Your Nitrogen level is: ${window.soilValues.n} kg/ha (which is ${res.nS === 'low' ? 'Low' : 'Optimal'}). If deficient, applying urea in split doses is recommended.\n`;
+      } else if (isPhDetail) {
+        advice += `• **pH Adjustment:** Your soil pH is: ${window.soilValues.ph}. If pH is below 6.0 (acidic), apply agricultural lime to neutralize. If pH is above 7.5 (alkaline), apply gypsum or elemental sulfur to balance it.\n`;
+      } else if (isOrganic) {
+        advice += `• **Organic Matter Improvement:** Your Organic Carbon is: ${window.soilValues.oc}%. To improve soil biology and water retention, apply 3–4 tonnes of compost/farmyard manure per acre, or cultivate green manure crops.\n`;
+      } else if (isWater) {
+        advice += `• **Irrigation Advice:** Your soil moisture is: ${window.soilValues.moisture}%. For heavy water crops like Paddy, ensure regular watering. For cotton and groundnut, adopt micro-irrigation like drip/sprinklers to prevent root decay.\n`;
+      } else if (isPest) {
+        advice += `• **Pest Prevention:** Implement Integrated Pest Management (IPM). Use natural neem oil sprays or bio-pesticides like Trichoderma before using chemical alternatives. Rotate crops to break pest cycles.\n`;
+      } else if (isSoilHealth) {
         advice += `• Your soil health score is **${res.score}/100**. Nutrient breakdown:\n`;
         advice += `  - pH Level: ${window.soilValues.ph} (${res.phS})\n`;
         advice += `  - Nitrogen (N): ${window.soilValues.n} kg/ha (${res.nS})\n`;
