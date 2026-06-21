@@ -844,6 +844,14 @@ async function loadUserProfile() {
       const initials = (currentProfile.full_name || 'VR').split(' ').map(n=>n[0]).join('').substring(0, 2).toUpperCase();
       const headerAvatar = document.getElementById('headerAvatar');
       if (headerAvatar) headerAvatar.textContent = initials || 'VR';
+      
+      // Update sidebar profile elements
+      const sidebarAvatar = document.getElementById('sidebarAvatar');
+      if (sidebarAvatar) sidebarAvatar.textContent = initials || 'VR';
+      const sidebarFarmerName = document.getElementById('sidebarFarmerName');
+      if (sidebarFarmerName) sidebarFarmerName.textContent = currentProfile.full_name || 'Farmer';
+      const sidebarFarmerVillage = document.getElementById('sidebarFarmerVillage');
+      if (sidebarFarmerVillage) sidebarFarmerVillage.textContent = currentProfile.village || '';
     }
   } catch (e) {
     console.error("Loading profile failed:", e);
@@ -851,40 +859,51 @@ async function loadUserProfile() {
 }
 
 function toggleAuthUI(isLoggedIn) {
-  const btnLogout = document.getElementById('btnLogout');
   const sbLogout = document.getElementById('sb-logout');
   const authProfileView = document.getElementById('authProfileView');
   const authFormArea = document.getElementById('authFormArea');
   const authTitle = document.getElementById('authTitle');
   const authSub = document.getElementById('authSub');
-  
-  if (btnLogout) btnLogout.style.display = isLoggedIn ? 'block' : 'none';
-  if (sbLogout) sbLogout.style.display = isLoggedIn ? 'flex' : 'none';
-  
+
+  // Sidebar profile section elements
+  const sbProfileLoggedOut = document.getElementById('sbProfileLoggedOut');
+  const sbProfileLoggedIn  = document.getElementById('sbProfileLoggedIn');
+
+  // Hide old sidebar logout item (now handled in profile section)
+  if (sbLogout) sbLogout.style.display = 'none';
+
+  // Toggle sidebar profile display
+  if (sbProfileLoggedOut) sbProfileLoggedOut.style.display = isLoggedIn ? 'none' : 'block';
+  if (sbProfileLoggedIn)  sbProfileLoggedIn.style.display  = isLoggedIn ? 'flex'  : 'none';
+
   if (isLoggedIn) {
     if (authProfileView) authProfileView.style.display = 'block';
-    if (authFormArea) authFormArea.style.display = 'none';
+    if (authFormArea)    authFormArea.style.display    = 'none';
     if (authTitle) authTitle.textContent = currentLang === 'en' ? 'My Profile' : 'నా ప్రొఫైల్';
-    if (authSub) authSub.textContent = currentLang === 'en' ? 'Manage your farm details.' : 'మీ వ్యవసాయ వివరాలను నిర్వహించండి.';
-    
+    if (authSub)   authSub.textContent   = currentLang === 'en' ? 'Manage your farm details.' : 'మీ వ్యవసాయ వివరాలను నిర్వహించండి.';
+
     if (currentProfile) {
       const initials = (currentProfile.full_name || 'VR').split(' ').map(n=>n[0]).join('').substring(0, 2).toUpperCase();
-      
-      const pName = document.getElementById('profileName');
-      const pVillage = document.getElementById('profileVillage');
-      const pPhone = document.getElementById('profilePhone');
+
+      const pName   = document.getElementById('profileName');
+      const pVillage= document.getElementById('profileVillage');
+      const pPhone  = document.getElementById('profilePhone');
       const pAvatar = document.getElementById('profileAvatarBig');
-      const hAvatar = document.getElementById('headerAvatar');
-      
-      if (pName) pName.textContent = currentProfile.full_name || '';
-      if (pVillage) pVillage.textContent = currentProfile.village || '';
-      if (pPhone) pPhone.textContent = currentProfile.phone || '';
-      if (pAvatar) pAvatar.textContent = initials || 'VR';
-      if (hAvatar) hAvatar.textContent = initials || 'VR';
+      const sbAvatar= document.getElementById('sidebarAvatar');
+      const sbName  = document.getElementById('sidebarFarmerName');
+      const sbVill  = document.getElementById('sidebarFarmerVillage');
+
+      if (pName)    pName.textContent    = currentProfile.full_name || '';
+      if (pVillage) pVillage.textContent = currentProfile.village   || '';
+      if (pPhone)   pPhone.textContent   = currentProfile.phone     || '';
+      if (pAvatar)  pAvatar.textContent  = initials || 'VR';
+      if (sbAvatar) sbAvatar.textContent = initials || 'VR';
+      if (sbName)   sbName.textContent   = currentProfile.full_name || 'Farmer';
+      if (sbVill)   sbVill.textContent   = currentProfile.village   || '';
     }
   } else {
     if (authProfileView) authProfileView.style.display = 'none';
-    if (authFormArea) authFormArea.style.display = 'block';
+    if (authFormArea)    authFormArea.style.display    = 'block';
     if (authTitle) {
       authTitle.textContent = authMode === 'login'
         ? (currentLang === 'en' ? 'Welcome Back' : 'తిరిగి స్వాగతం')
@@ -895,11 +914,8 @@ function toggleAuthUI(isLoggedIn) {
         ? (currentLang === 'en' ? 'Enter your details to continue.' : 'కొనసాగించడానికి మీ వివరాలను నమోదు చేయండి.')
         : (currentLang === 'en' ? 'Join thousands of farmers getting free soil advice.' : 'ఉచిత మట్టి సలహా పొందుతున్న వేలాది మంది రైతులతో చేరండి.');
     }
-    
-    const hAvatar = document.getElementById('headerAvatar');
-    if (hAvatar) hAvatar.textContent = 'VR';
   }
-  
+
   TRANSLATIONS.en['sb-lbl-profile'] = isLoggedIn ? 'Profile' : 'Login';
   TRANSLATIONS.te['sb-lbl-profile'] = isLoggedIn ? 'ప్రొఫైల్' : 'లాగిన్';
   translateUI();
