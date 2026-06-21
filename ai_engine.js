@@ -13,7 +13,10 @@ const GEMINI_FALLBACK = 'gemini-2.0-flash-lite'; // 30 RPM free tier, separate q
 
 function geminiUrl(model) {
   if (useBackendProxy) {
-    return `http://localhost:5000/api/chat/stream?model=${model}`;
+    const host = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+      ? 'http://localhost:5000'
+      : '';
+    return `${host}/api/chat/stream?model=${model}`;
   }
   return `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${GEMINI_API_KEY}`;
 }
