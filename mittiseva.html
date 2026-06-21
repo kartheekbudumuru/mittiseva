@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MittiSeva · మిట్టిసేవ — Soil Health Analysis</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌿</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js?v=302"></script>
+<link rel="stylesheet" href="mittiseva.css?v=302" />
+</head>
+<body>
+<div class="dashboard-layout">
+
+  <!-- ══ LEFT SIDEBAR NAVIGATION ══ -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">Mitti<span>Seva</span></div>
+      <div class="sidebar-sub" id="sidebar-sub">Soil Integrity</div>
+    </div>
+    <nav class="sidebar-menu">
+      <button class="sidebar-item active" id="sb-landing" onclick="showPage('landing')">
+        <span class="sb-icon">🏠</span>
+        <span class="sb-label" id="sb-lbl-home">Home</span>
+      </button>
+      <button class="sidebar-item" id="sb-auth" onclick="showPage('auth')">
+        <span class="sb-icon">👤</span>
+        <span class="sb-label" id="sb-lbl-profile">Profile</span>
+      </button>
+      <button class="sidebar-item" id="sb-form" onclick="showPage('form')">
+        <span class="sb-icon">🔬</span>
+        <span class="sb-label" id="sb-lbl-analyse">Analyse Soil</span>
+      </button>
+      <button class="sidebar-item" id="sb-results" onclick="showPage('results')">
+        <span class="sb-icon">📊</span>
+        <span class="sb-label" id="sb-lbl-results">Results</span>
+      </button>
+      <button class="sidebar-item" id="sb-report" onclick="showPage('report')">
+        <span class="sb-icon">📋</span>
+        <span class="sb-label" id="sb-lbl-report">Report</span>
+      </button>
+      <button class="sidebar-item" id="sb-dashboard" onclick="showPage('dashboard')">
+        <span class="sb-icon">📈</span>
+        <span class="sb-label" id="sb-lbl-history">History</span>
+      </button>
+      <button class="sidebar-item" id="sb-chat" onclick="showPage('chat')">
+        <span class="sb-icon">🌿</span>
+        <span class="sb-label" id="sb-lbl-chat">Krishi AI</span>
+      </button>
+      <button class="sidebar-item" id="sb-logout" onclick="logoutUser()" style="display:none;color:var(--red)">
+        <span class="sb-icon">🚪</span>
+        <span class="sb-label" id="sb-lbl-logout">Logout</span>
+      </button>
+    </nav>
+  </aside>
+
+  <!-- ══ MAIN CONTENT CANVAS ══ -->
+  <main class="main-content">
+    <header class="top-header">
+      <h1 class="header-title" id="header-page-title">Home Explorer</h1>
+      <div class="header-right">
+        <button class="lang-btn" id="langBtn" onclick="toggleLang()">తెలుగు</button>
+        <button class="lang-btn" id="btnLogout" onclick="logoutUser()" style="display:none;background:rgba(192,57,43,.1);border-color:rgba(192,57,43,.25);color:var(--red);font-weight:600">Logout</button>
+        <div class="profile-avatar" id="headerAvatar">VR</div>
+      </div>
+    </header>
+
+    <div class="content-canvas">
+
+      <!-- ══════════════════════════════════════════
+           PAGE 1 · LANDING
+      ══════════════════════════════════════════ -->
+      <div class="page active" id="page-landing">
+        <div class="hero">
+    <div class="hero-dots"></div>
+    <div class="hero-tag" id="hero-tag">🇮🇳 Free Government Service · AP & Telangana</div>
+    <h1 class="hero-title" id="hero-title">Know Your <span class="accent">Soil.</span><br>Grow Your Future.</h1>
+    <p class="hero-sub" id="hero-sub">Free soil testing and crop advice for every farmer in Andhra Pradesh & Telangana. Results in minutes, not weeks.</p>
+    <div class="hero-btns">
+      <button class="btn btn-gold" id="btn-analyse" onclick="showPage('form')">🔬 Analyse My Soil</button>
+      <button class="btn-hero-outline" id="btn-hero-login" onclick="showPage('auth')">Login / Register</button>
+    </div>
+  </div>
+
+  <div style="padding:24px 20px 8px">
+    <p style="font-size:12px;font-weight:600;color:var(--text-light);letter-spacing:1px;text-transform:uppercase" id="what-you-get">What you get</p>
+    <h2 class="section-title" id="feature-title" style="margin-top:4px">Everything a farmer needs</h2>
+  </div>
+
+  <div class="features-grid">
+    <div class="feature-chip">
+      <div class="feature-icon">🔬</div>
+      <div class="feature-name" id="feat-soil-title">Soil Analysis</div>
+      <div class="feature-desc" id="feat-soil-desc">Check pH, N, P, K, moisture and organic carbon</div>
+    </div>
+    <div class="feature-chip">
+      <div class="feature-icon">🌿</div>
+      <div class="feature-name" id="feat-fert-title">Fertilizer Tips</div>
+      <div class="feature-desc" id="feat-fert-desc">Right fertilizer, right dose, right time</div>
+    </div>
+    <div class="feature-chip">
+      <div class="feature-icon">🌾</div>
+      <div class="feature-name" id="feat-crop-title">Crop Guide</div>
+      <div class="feature-desc" id="feat-crop-desc">Best crops suited to your exact soil</div>
+    </div>
+    <div class="feature-chip">
+      <div class="feature-icon">📋</div>
+      <div class="feature-name" id="feat-rep-title">Health Report</div>
+      <div class="feature-desc" id="feat-rep-desc">Download & share with your agriculture officer</div>
+    </div>
+  </div>
+
+  <div class="testimonial">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+      <span style="font-size:28px">👨‍🌾</span>
+      <div>
+        <div style="font-weight:600;font-size:14px" id="test-title">2.4 lakh+ farmers trust MittiSeva</div>
+        <div style="font-size:12px;color:var(--text-light)" id="test-sub">Across 13 districts in AP & Telangana</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text-mid);font-style:italic;line-height:1.6" id="test-body">"After testing my soil, I switched to groundnut from cotton. My income went up by 40% this season."<br><strong>— Ramaiah, Kurnool</strong></div>
+  </div>
+
+  <div style="padding:0 20px 20px;display:flex;flex-direction:column;gap:10px">
+    <button class="btn btn-primary" id="btn-start-test" onclick="showPage('form')">🔬 Start Soil Analysis</button>
+    <div class="home-btn-row">
+      <button class="btn btn-outline" id="btn-view-past" onclick="showPage('dashboard')">View My Past Tests</button>
+      <button class="btn-ai-chat" id="btn-chat-home" onclick="showPage('chat')">🌿 <span id="btn-chat-home-lbl">Krishi AI</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PAGE 2 · AUTH
+ ══════════════════════════════════════════ -->
+<div class="page" id="page-auth">
+  <div class="section-pad">
+    <h2 class="section-title" id="authTitle">Welcome Back</h2>
+    <p class="section-sub" id="authSub">Enter your details to continue.</p>
+  </div>
+  <div style="padding:0 20px">
+    <!-- Authenticated Profile View (initially hidden) -->
+    <div id="authProfileView" style="display:none;background:white;border-radius:16px;padding:20px;border:1px solid rgba(139,94,60,.12);margin-bottom:14px">
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px">
+        <div id="profileAvatarBig" style="width:64px;height:64px;border-radius:50%;background:var(--forest);color:white;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;font-family:'Playfair Display',serif">VR</div>
+        <div>
+          <h3 id="profileName" style="font-size:18px;font-weight:700;color:var(--forest)"></h3>
+          <p id="profileVillage" style="font-size:14px;color:var(--text-light)"></p>
+        </div>
+      </div>
+      <div style="border-top:1px solid rgba(139,94,60,.1);padding-top:16px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:10px;font-size:14px">
+          <span style="color:var(--text-light)" id="lbl-profile-phone">Phone Number</span>
+          <strong style="margin-left:auto" id="profilePhone"></strong>
+        </div>
+      </div>
+      <button class="btn btn-outline" style="margin-top:20px;color:var(--red);border-color:var(--red)" onclick="logoutUser()">Logout</button>
+    </div>
+
+    <!-- Login/Register Form Elements -->
+    <div id="authFormArea">
+      <div class="tab-bar">
+        <button class="tab-btn active" id="tabLogin" onclick="switchAuth('login')">Login</button>
+        <button class="tab-btn" id="tabReg" onclick="switchAuth('register')">Register</button>
+      </div>
+      <div class="card">
+        <div class="form-group" id="fieldName" style="display:none">
+          <label class="form-label" id="label-name">Full Name</label>
+          <input class="form-input" id="inpName" placeholder="e.g. Venkata Rao" />
+          <div class="form-error" id="errName">Please enter your name</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" id="label-phone">Phone Number</label>
+          <input class="form-input" id="inpPhone" placeholder="e.g. 9876543210" type="tel" />
+          <div class="form-error" id="errPhone">Enter a valid 10-digit mobile number</div>
+        </div>
+        <div class="form-group" id="fieldVillage" style="display:none">
+          <label class="form-label" id="label-village">Village / Location</label>
+          <input class="form-input" id="inpVillage" placeholder="e.g. Nandyal, Kurnool" />
+          <div class="form-error" id="errVillage">Please enter your village</div>
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label" id="label-pass">Password</label>
+          <input class="form-input" id="inpPassword" type="password" placeholder="At least 6 characters" />
+          <div class="form-error" id="errPass">Password must be at least 6 characters</div>
+        </div>
+      </div>
+      <div style="margin:14px 0 16px"><button class="btn btn-primary" id="btn-auth-submit" onclick="submitAuth()">Login →</button></div>
+      <p style="text-align:center;font-size:13px;color:var(--text-light)">
+        <span style="color:var(--forest);font-weight:600;cursor:pointer" id="auth-switch-text" onclick="switchAuth(authMode==='login'?'register':'login')">New here? Register</span>
+      </p>
+      <div class="warn-box" style="margin-top:20px">🔒 Your data is secure and only used to give you soil advice. We never share it.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PAGE 3 · SOIL FORM
+══════════════════════════════════════════ -->
+<div class="page" id="page-form">
+  <div class="section-pad">
+    <h2 class="section-title" id="form-title">Enter Your Soil Details</h2>
+    <p class="section-sub" id="form-sub">Move the sliders or type values from your soil test report.</p>
+  </div>
+  <div style="padding:0 20px">
+    <div id="paramsContainer"></div>
+    <button class="btn btn-primary" id="btn-run-analysis" style="font-size:16px;padding:16px;margin-top:8px" onclick="runAnalysis()">🔬 Analyse Soil</button>
+    <div class="info-box" style="margin-top:14px">💡 Don't have test values? Get a free soil test from your nearest <strong>Rythu Seva Kendra</strong> or <strong>Krishi Vigyan Kendra</strong>.</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PAGE 4 · RESULTS
+══════════════════════════════════════════ -->
+<div class="page" id="page-results">
+  <div class="section-pad">
+    <h2 class="section-title" id="results-title">Your Soil Results</h2>
+    <p class="section-sub" id="results-sub">Here's what your soil is telling you.</p>
+  </div>
+  <div style="padding:0 20px">
+    <!-- Gauge -->
+    <div class="card">
+      <div class="gauge-wrap">
+        <svg id="gaugesvg" width="200" height="120" viewBox="0 0 200 120">
+          <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="rgba(139,94,60,.12)" stroke-width="14" stroke-linecap="round"/>
+          <path id="gaugeFill" d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#2D7A1C" stroke-width="14" stroke-linecap="round" stroke-dasharray="0 251.2"/>
+          <text id="gaugeScore" x="100" y="90" text-anchor="middle" font-size="38" font-weight="700" font-family="Playfair Display,serif" fill="#2D7A1C">0</text>
+          <text id="gaugeLabel" x="100" y="112" text-anchor="middle" font-size="12" fill="#7A6452" font-family="Inter,sans-serif">Good Soil Health</text>
+        </svg>
+      </div>
+      <p id="scoreMsg" style="text-align:center;font-size:13px;color:var(--text-light);padding-bottom:4px"></p>
+    </div>
+
+    <!-- Nutrients -->
+    <div class="card">
+      <div style="font-weight:700;font-size:15px;margin-bottom:4px" id="res-nut-title">Nutrient Status</div>
+      <div style="font-size:12px;color:var(--text-light);margin-bottom:14px" id="res-nut-sub">Based on your readings</div>
+      <div id="nutrientRows"></div>
+    </div>
+
+    <!-- Fertilizer -->
+    <div class="card">
+      <div style="font-weight:700;font-size:15px;margin-bottom:14px" id="res-fert-title">🌱 Fertilizer Recommendations</div>
+      <div id="fertRows"></div>
+    </div>
+
+    <!-- Crops -->
+    <div class="card">
+      <div style="font-weight:700;font-size:15px;margin-bottom:14px" id="res-crop-title">🌾 Crop Recommendations</div>
+      <div id="cropRows"></div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:8px">
+      <button class="btn btn-primary" id="btn-gen-report" onclick="showPage('report')">📋 Generate Report</button>
+      <button class="btn btn-outline" id="btn-retest" onclick="showPage('form')">Re-test with new values</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PAGE 5 · REPORT
+══════════════════════════════════════════ -->
+<div class="page" id="page-report">
+  <div class="section-pad">
+    <h2 class="section-title" id="report-title">Soil Health Report</h2>
+    <p class="section-sub" id="report-sub">Ready to download and share with your agriculture officer.</p>
+  </div>
+  <div style="padding:0 20px">
+    <div style="background:white;border-radius:14px;border:1px solid rgba(139,94,60,.12);overflow:hidden;margin-bottom:18px">
+      <div class="report-header">
+        <div style="color:var(--cream);font-size:12px;font-weight:600;letter-spacing:.5px;margin-bottom:6px" id="rep-cert">SOIL TEST CERTIFICATE</div>
+        <div style="color:white;font-family:'Playfair Display',serif;font-size:22px;font-weight:700;margin-bottom:4px">MittiSeva · మిట్టిసేవ</div>
+        <div style="color:rgba(245,240,232,.7);font-size:12px" id="rep-gov">Government of Andhra Pradesh · Agriculture Dept.</div>
+      </div>
+      <div style="padding:16px 20px">
+        <div class="report-section">
+          <div class="sec-label" id="rep-sec-farmer">Farmer Details</div>
+          <div class="report-row"><span class="report-label" id="rep-label-name">Name</span><span class="report-val" id="reportFarmerName">Venkata Rao</span></div>
+          <div class="report-row"><span class="report-label" id="rep-label-village">Village</span><span class="report-val" id="reportFarmerVillage">Nandyal, Kurnool</span></div>
+          <div class="report-row"><span class="report-label" id="rep-label-date">Test Date</span><span class="report-val" id="reportDate"></span></div>
+        </div>
+        <div class="report-section">
+          <div class="sec-label" id="rep-sec-score">Health Score</div>
+          <div style="display:flex;align-items:center;gap:14px">
+            <div id="reportScoreBadge" style="width:56px;height:56px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;color:white;font-size:20px;font-weight:700;font-family:'Playfair Display',serif">0</div>
+            <div>
+              <div id="reportScoreLabel" style="font-weight:700;font-size:16px">Good Soil Health</div>
+              <div style="font-size:12px;color:var(--text-light)" id="rep-lbl-score">Out of 100 points</div>
+            </div>
+          </div>
+        </div>
+        <div class="report-section">
+          <div class="sec-label" id="rep-sec-readings">Soil Readings</div>
+          <div id="reportReadings"></div>
+        </div>
+        <div class="report-section">
+          <div class="sec-label" id="rep-sec-recs">Recommendations</div>
+          <div id="reportRecs"></div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <button class="btn btn-primary" id="btn-print" onclick="window.print()">⬇ Download / Print Report</button>
+      <button class="btn btn-outline" id="btn-share" onclick="shareReport()">📤 Share Report</button>
+      <button class="btn-ghost" id="btn-view-hist" onclick="showPage('dashboard')">View my soil history →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PAGE 6 · DASHBOARD
+══════════════════════════════════════════ -->
+<div class="page" id="page-dashboard">
+  <div class="section-pad">
+    <h2 class="section-title" id="history-title">My Soil History</h2>
+    <p class="section-sub" id="history-sub">Your past soil tests, all in one place.</p>
+  </div>
+  <div style="padding:0 20px">
+    <div class="card">
+      <div style="font-weight:700;font-size:14px;margin-bottom:14px" id="hist-chart-title">Health Score Over Time</div>
+      <div style="position:relative;height:170px"><canvas id="trendChart" role="img" aria-label="Line chart of soil health scores over 5 tests from Jan 2025 to Jan 2026"></canvas></div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-box"><div class="stat-num" id="latestScore">79</div><div class="stat-lbl" id="hist-lbl-latest">Latest Score</div></div>
+      <div class="stat-box" style="background:rgba(201,168,76,.1)"><div class="stat-num" id="latestImprovement" style="color:var(--gold)">+27</div><div class="stat-lbl" id="hist-lbl-imp">Improvement</div></div>
+      <div class="stat-box" style="background:rgba(168,197,122,.15)"><div class="stat-num" id="totalTests" style="color:var(--green)">5</div><div class="stat-lbl" id="hist-lbl-tests">Tests Done</div></div>
+    </div>
+
+    <div class="card" style="overflow-x:auto">
+      <div style="font-weight:700;font-size:14px;margin-bottom:14px" id="hist-tbl-title">All Test Records</div>
+      <table class="hist-table">
+        <thead>
+          <tr>
+            <th id="hist-th-date">Date</th>
+            <th id="hist-th-ph">pH</th>
+            <th id="hist-th-n">N (kg/ha)</th>
+            <th id="hist-th-score">Score</th>
+          </tr>
+        </thead>
+        <tbody id="historyBody"></tbody>
+      </table>
+    </div>
+
+    <button class="btn btn-primary" id="btn-quick-retest" onclick="showPage('form')">🔬 Quick Re-test</button>
+  </div>
+</div>
+
+      <!-- ══════════════════════════════════════════
+           PAGE 7 · KRISHI AI CHAT (FULL SCREEN)
+      ══════════════════════════════════════════ -->
+      <div class="page" id="page-chat">
+        <div class="section-pad" style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+          <div>
+            <h2 class="section-title" id="chat-title-full">Krishi AI Assistant</h2>
+            <p class="section-sub" id="chat-sub-full">Ask me anything about soil health, crops, or fertilizers.</p>
+          </div>
+          <button onclick="clearChatHistory()" title="Clear chat history" style="flex-shrink:0;margin-top:4px;background:none;border:1px solid rgba(139,94,60,.2);color:var(--text-light);border-radius:8px;padding:6px 10px;font-size:12px;cursor:pointer;font-family:'Inter',sans-serif" onmouseover="this.style.background='#fee2e2';this.style.color='#b91c1c'" onmouseout="this.style.background='none';this.style.color='var(--text-light)'">🗑 Clear</button>
+        </div>
+        <div style="padding:0 20px">
+          <div class="chat-full-container">
+            <div class="chat-msgs-full" id="chatMsgsFull">
+              <div class="msg-ai" id="chat-welcome-full">Namaste! I'm Krishi AI. Ask me anything about soil, crops, or fertilizers. I'm here to help! 🌿</div>
+            </div>
+            <div class="chat-input-row-full">
+              <input class="chat-input-full" id="chatInputFull" placeholder="Ask about your soil..." onkeydown="if(event.key==='Enter')sendChatFull()" />
+              <button class="chat-send-full" id="send-btn-full" onclick="sendChatFull()">↑</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /.content-canvas -->
+  </main><!-- /.main-content -->
+</div><!-- /.dashboard-layout -->
+
+<!-- ══ BOTTOM NAV (MOBILE) ══ -->
+<nav class="bottom-nav">
+  <button class="bnav-btn active" id="bn-landing" onclick="showPage('landing')"><span class="bicon">🏠</span><span class="blabel" id="bn-lbl-home">Home</span></button>
+  <button class="bnav-btn" id="bn-form" onclick="showPage('form')"><span class="bicon">🔬</span><span class="blabel" id="bn-lbl-analyse">Analyse</span></button>
+  <button class="bnav-btn" id="bn-results" onclick="showPage('results')"><span class="bicon">📊</span><span class="blabel" id="bn-lbl-results">Results</span></button>
+  <button class="bnav-btn" id="bn-dashboard" onclick="showPage('dashboard')"><span class="bicon">📋</span><span class="blabel" id="bn-lbl-history">History</span></button>
+</nav>
+
+<!-- ══ FLOATING CHAT (MOBILE) ══ -->
+<div class="chat-panel" id="chatPanel">
+  <div class="chat-header">
+    <span id="chat-title-mobile">🌿 Krishi AI Assistant</span>
+    <button class="chat-close" onclick="toggleChat()">×</button>
+  </div>
+  <div class="chat-msgs" id="chatMsgs">
+    <div class="msg-ai" id="chat-welcome-mobile">Namaste! I'm Krishi AI. Ask me anything about soil, crops, or fertilizers. I'm here to help! 🌿</div>
+  </div>
+  <div class="chat-input-row">
+    <input class="chat-input" id="chatInput" placeholder="Ask about your soil..." onkeydown="if(event.key==='Enter')sendChat()" />
+    <button class="chat-send" id="send-btn-mobile" onclick="sendChat()">↑</button>
+  </div>
+</div>
+<button class="chat-fab" onclick="toggleChat()">🌿 <span id="chat-fab-lbl">Ask Krishi AI</span></button>
+
+<script src="mittiseva.js?v=302"></script>
+<script src="ai_engine.js?v=5"></script>
+</body>
+</html>
