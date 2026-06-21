@@ -284,12 +284,14 @@ function createStreamingBubble(containerId) {
 }
 
 // ── Offline Fallback Guidance ──
-function getOfflineFallbackMessage() {
+function getOfflineFallbackMessage(userMessage) {
   const isTe = window.currentLang === 'te';
+  const msg = (userMessage || '').toLowerCase();
+  
   const busyMsg = isTe 
     ? '⏳ కృషి AI తాత్కాలికంగా బిజీగా ఉంది. దయచేసి ఒక నిమిషం తర్వాత మళ్లీ ప్రయత్నించండి.' 
     : '⏳ Krishi AI is temporarily busy. Please try again in a minute.';
-  
+
   if (typeof analyseSoil !== 'function' || !window.soilValues) {
     return busyMsg;
   }
@@ -301,19 +303,67 @@ function getOfflineFallbackMessage() {
     const cropList = res.crops ? res.crops.map(c => `${c.icon} ${c.name}`).join(', ') : '';
     const fertList = res.ferts ? res.ferts.map(f => `${f.icon} ${f.name} (${f.dose})`).join(', ') : '';
 
+    // Intent detection
+    const isSoilHealth = msg.includes('health') || msg.includes('score') || msg.includes('ఆరోగ్య') || msg.includes('status') || msg.includes('how is my soil');
+    const isFertilizer = msg.includes('fertilizer') || msg.includes('urea') || msg.includes('dap') || msg.includes('mop') || msg.includes('ఎరువు') || msg.includes('nutrient');
+    const isCrops = msg.includes('crop') || msg.includes('paddy') || msg.includes('grow') || msg.includes('sow') || msg.includes('పంట') || msg.includes('cotton') || msg.includes('groundnut');
+    const isHello = msg.includes('hello') || msg.includes('hi') || msg.includes('namaste') || msg.includes('నమస్తే') || msg.includes('హలో');
+
     if (isTe) {
-      let advice = `${busyMsg}\n\n📢 **మట్టి విశ్లేషణ నుండి త్వరిత సలహా:**\n`;
-      advice += `• **ఆరోగ్య స్కోరు:** ${res.score}/100\n`;
-      if (cropList) advice += `• **సిఫార్సు చేసిన పంటలు:** ${cropList}\n`;
-      if (fertList) advice += `• **సూచించిన ఎరువులు:** ${fertList}\n`;
+      let advice = `${busyMsg}\n\n🤖 **స్థానిక కృషి సలహాదారు (ఆఫ్‌లైన్ మోడ్):**\n`;
+      
+      if (isSoilHealth) {
+        advice += `• మీ మట్టి ఆరోగ్య స్కోరు **100 కి గాను ${res.score} పాయింట్లు**. మీ మట్టి యొక్క పోషకాల స్థాయిలు:\n`;
+        advice += `  - pH విలువ: ${window.soilValues.ph} (${res.phS === 'optimal' ? 'సముచితం' : res.phS === 'low' ? 'తక్కువ' : 'ఎక్కువ'})\n`;
+        advice += `  - నత్రజని (N): ${window.soilValues.n} kg/ha (${res.nS === 'optimal' ? 'సముచితం' : res.nS === 'low' ? 'తక్కువ' : 'ఎక్కువ'})\n`;
+        advice += `  - భాస్వరం (P): ${window.soilValues.p} kg/ha\n`;
+        advice += `  - పొటాషియం (K): ${window.soilValues.k} kg/ha\n`;
+      } else if (isFertilizer) {
+        advice += `• మీ మట్టి నివేదిక ప్రకారం కింది **ఎరువులు** సిఫార్సు చేయబడ్డాయి:\n`;
+        res.ferts.forEach(f => {
+          advice += `  - ${f.icon} **${f.name}**: మోతాదు: ${f.dose}\n`;
+        });
+      } else if (isCrops) {
+        advice += `• మీ మట్టి రకం మరియు తేమ ఆధారంగా సిఫార్సు చేయబడిన **పంటలు**:\n`;
+        res.crops.forEach(c => {
+          advice += `  - ${c.icon} **${c.name}** (సీజన్: ${c.season === 'Kharif' ? 'ఖరీఫ్' : 'రబీ/ఖరీఫ్'})\n`;
+        });
+      } else if (isHello) {
+        advice += `• నమస్తే! నేను కృషి AIని. ప్రస్తుతం సర్వర్ బిజీగా ఉన్నందున నేను మీ మట్టి పరీక్ష విలువల ఆధారంగా సమాధానాలు ఇస్తున్నాను. మీ మట్టి ఆరోగ్యం, పంటలు లేదా ఎరువుల గురించి నన్ను ఏదైనా అడగండి.`;
+      } else {
+        advice += `• మీ మట్టి ఆరోగ్య స్కోరు: **${res.score}/100**\n`;
+        if (cropList) advice += `• సిఫార్సు చేసిన పంటలు: ${cropList}\n`;
+        if (fertList) advice += `• సిఫార్సు చేసిన ఎరువులు: ${fertList}\n`;
+      }
       advice += `\n📋 పూర్తి వివరాల కోసం మెనూలోని **'రిపోర్ట్' (Report)** పేజీని సందర్శించండి.`;
       return advice;
     } else {
-      let advice = `${busyMsg}\n\n📢 **Quick guidance based on your soil data:**\n`;
-      advice += `• **Soil Health Score:** ${res.score}/100\n`;
-      if (cropList) advice += `• **Recommended Crops:** ${cropList}\n`;
-      if (fertList) advice += `• **Suggested Fertilizers:** ${fertList}\n`;
-      advice += `\n📋 For a detailed PDF, visit the **'Report'** page in the menu.`;
+      let advice = `${busyMsg}\n\n🤖 **Krishi Local Expert (Offline Mode):**\n`;
+      
+      if (isSoilHealth) {
+        advice += `• Your soil health score is **${res.score}/100**. Nutrient breakdown:\n`;
+        advice += `  - pH Level: ${window.soilValues.ph} (${res.phS})\n`;
+        advice += `  - Nitrogen (N): ${window.soilValues.n} kg/ha (${res.nS})\n`;
+        advice += `  - Phosphorus (P): ${window.soilValues.p} kg/ha (${res.pS})\n`;
+        advice += `  - Potassium (K): ${window.soilValues.k} kg/ha (${res.kS})\n`;
+      } else if (isFertilizer) {
+        advice += `• Based on your soil report, the following **fertilizers** are recommended:\n`;
+        res.ferts.forEach(f => {
+          advice += `  - ${f.icon} **${f.name}**: Apply ${f.dose}\n`;
+        });
+      } else if (isCrops) {
+        advice += `• Suited **crops** for your soil profile:\n`;
+        res.crops.forEach(c => {
+          advice += `  - ${c.icon} **${c.name}** (Season: ${c.season})\n`;
+        });
+      } else if (isHello) {
+        advice += `• Namaste! I am Krishi AI. The AI server is temporarily busy, but I can answer questions using your local soil report values. Ask me about soil health, crops, or fertilizers!`;
+      } else {
+        advice += `• Soil Health Score: **${res.score}/100**\n`;
+        if (cropList) advice += `• Recommended Crops: ${cropList}\n`;
+        if (fertList) advice += `• Suggested Fertilizers: ${fertList}\n`;
+      }
+      advice += `\n📋 For a detailed PDF report, visit the **'Report'** page in the menu.`;
       return advice;
     }
   } catch (e) {
@@ -412,9 +462,9 @@ async function krishiSend(inputId, msgsContainerId, chatId) {
     } else if (msg.includes('403')) {
       errorMsg = isTe ? '❌ కీ ప్రామాణీకరించబడలేదు.' : '❌ API key not authorized. Check Google AI Studio settings.';
     } else if (msg.includes('QUOTA_EXHAUSTED')) {
-      errorMsg = getOfflineFallbackMessage();
+      errorMsg = getOfflineFallbackMessage(userMessage);
     } else if (msg.includes('RATE_LIMIT') || msg.includes('429') || msg.includes('Rate limit')) {
-      errorMsg = getOfflineFallbackMessage();
+      errorMsg = getOfflineFallbackMessage(userMessage);
     } else if (msg.includes('404')) {
       errorMsg = isTe ? '❌ మోడల్ కనుగొనబడలేదు.' : '❌ AI model not found. Please hard-reload the page (Ctrl+Shift+R).';
     } else if (!navigator.onLine) {
