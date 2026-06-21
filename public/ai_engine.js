@@ -1,25 +1,7 @@
 // ═══════════════════════════════════════════════════════════
-//  KRISHI AI ENGINE  ·  Powered by Google Gemini 2.0 Flash
+//  KRISHI AI ENGINE  ·  Powered by OpenRouter AI
 //  MittiSeva · Agriculture Assistant for AP & Telangana
 // ═══════════════════════════════════════════════════════════
-
-// ── Gemini API Configuration ──
-const GEMINI_API_KEY = ''; // Key is stored securely on the backend server — never expose here
-const useBackendProxy = true; // Always proxy via backend to prevent leaking API keys on the frontend
-
-// Primary + fallback models (fallback has separate, higher quota)
-const GEMINI_PRIMARY  = 'gemini-2.0-flash';
-const GEMINI_FALLBACK = 'gemini-2.0-flash-lite'; // 30 RPM free tier, separate quota
-
-function geminiUrl(model) {
-  if (useBackendProxy) {
-    const host = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-      ? 'http://localhost:5000'
-      : '';
-    return `${host}/api/chat/stream?model=${model}`;
-  }
-  return `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${GEMINI_API_KEY}`;
-}
 
 // ── Rate-limit state ──
 let rateLimitedUntil = 0;   // epoch ms when we can retry
@@ -29,201 +11,119 @@ const MIN_GAP_MS     = 1500; // minimum ms between sends
 // ── In-memory conversation history (multi-turn) ──
 const chatHistory = { mobile: [], full: [] };
 
-// ── System Prompt ──
-function buildSystemPrompt() {
+// ── Context Injection ──
+function getSoilContext() {
   const profile    = window.currentProfile;
   const history    = window.HISTORY || [];
   const soilValues = window.soilValues || {};
+  const farmerName = profile?.full_name || 'Farmer';
+  const farmerVillage = profile?.village || 'your village';
 
-  const farmerName    = profile?.full_name || 'Farmer';
-  const farmerVillage = profile?.village   || 'your village';
-  const lastTest      = history.length > 0 ? history[history.length - 1] : null;
+  let soilData = null;
 
-  const soilContext = lastTest
-    ? `\nFarmer's Latest Soil Test:\n- pH: ${lastTest.ph}\n- N: ${lastTest.n} kg/ha  P: ${lastTest.p} kg/ha  K: ${lastTest.k} kg/ha\n- Health Score: ${lastTest.score}/100  (${lastTest.date})\n`
-    : soilValues.ph
-    ? `\nCurrent Input Values (not saved yet):\n- pH: ${soilValues.ph}, N: ${soilValues.n}, P: ${soilValues.p}, K: ${soilValues.k}, Moisture: ${soilValues.moisture}%, OC: ${soilValues.oc}%\n`
-    : '\nNo soil test data yet for this farmer.\n';
-
-  const histContext = history.length > 1
-    ? `\nHistory (${history.length} tests):\n` + history.map(h => `  • ${h.date}: pH ${h.ph}, Score ${h.score}/100`).join('\n') + '\n'
-    : '';
-
-  return `You are Krishi AI, a friendly expert agricultural assistant inside MittiSeva — a free soil health app for farmers in Andhra Pradesh and Telangana, India.
-
-Helping: ${farmerName} from ${farmerVillage}.
-${soilContext}${histContext}
-Personality:
-- Warm, respectful, village-level language — like a knowledgeable friend
-- Respond in Telugu if the farmer writes in Telugu; English otherwise
-- Always use the farmer's actual soil numbers when relevant
-- Never give generic copy-paste answers
-
-Expertise:
-- Soil Science: pH, NPK, organic carbon, micronutrients, texture
-- Crops for AP & Telangana: Paddy, Cotton, Groundnut, Maize, Chilli, Redgram, Bengalgram, Sunflower, Turmeric, Sugarcane
-- Fertilizers: Urea, DAP, MOP, SSP, NPK complexes, biofertilizers (Azospirillum, PSB, Trichoderma)
-- Schemes: PM-KISAN, Rythu Bandhu, RBK, Soil Health Card, RKVY
-- Irrigation: drip, sprinkler, flood, rain-fed
-- Pest & Disease: IPM, organic solutions, safe chemicals, Zero Budget Farming
-- Seasons: Kharif (Jun–Oct), Rabi (Oct–Mar), Zaid/Summer
-- Markets: MSP, mandal markets, e-NAM
-
-Rules:
-1. 3–5 lines for simple questions; bullet points for complex advice
-2. End every reply with one actionable step or encouragement
-3. Use emojis sparingly: 🌾 🌿 💧 🧪 🌱 👨‍🌾
-4. Use actual soil numbers from data above, not made-up values
-5. Say "I'll need to verify" for government scheme amounts
-6. NO "I am an AI" disclaimers — just answer naturally
-
-MittiSeva features to mention when relevant:
-- "Analyse Soil" → enter values and get full report
-- "History" → view all past tests
-- Download soil report PDF → show to agriculture officer at RBK`;
-}
-
-// ── Retry fetch with exponential backoff ──
-async function fetchWithRetry(model, body, maxRetries = 3) {
-  const delays = [8000, 20000, 40000]; // 8s → 20s → 40s
-
-  for (let attempt = 0; attempt <= maxRetries; attempt++) {
-    const response = await fetch(geminiUrl(model), {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    });
-
-    if (response.ok) return response;
-
-    const status  = response.status;
-    const errText = await response.text();
-
-    // On 429: throw a proper Error with metadata attached
-    if (status === 429) {
-      // Check for hard quota limit to avoid useless retries
-      let isHardQuota = false;
-      try {
-        const errObj = JSON.parse(errText);
-        const errMsg = errObj?.error?.message || '';
-        if (errMsg.toLowerCase().includes('quota') || errMsg.toLowerCase().includes('limit: 0') || errMsg.toLowerCase().includes('exhausted')) {
-          isHardQuota = true;
-        }
-      } catch (_) {}
-
-      if (isHardQuota) {
-        throw new Error('QUOTA_EXHAUSTED');
-      }
-
-      const retryAfter = parseInt(response.headers.get('Retry-After') || '0', 10);
-      const waitMs = retryAfter > 0 ? retryAfter * 1000 : (delays[attempt] || 40000);
-
-      if (attempt < maxRetries) {
-        rateLimitedUntil = Date.now() + waitMs;
-        const rateErr = new Error('RATE_LIMIT_429');
-        rateErr.isRateLimit = true;
-        rateErr.waitMs = waitMs;
-        throw rateErr;
-      }
-      throw new Error(`Rate limit exceeded. Please wait ${Math.ceil((delays[2]||40000)/1000)}s and try again.`);
-    }
-
-
-    // On 503 / 500: retry silently
-    if ((status === 503 || status === 500) && attempt < maxRetries) {
-      await new Promise(r => setTimeout(r, delays[attempt] || 10000));
-      continue;
-    }
-
-    throw new Error(`Gemini API error ${status}: ${errText.substring(0, 200)}`);
-  }
-}
-
-// ── Show live countdown bubble ──
-function showCountdownBubble(containerId, waitMs, onRetry) {
-  const msgs = document.getElementById(containerId);
-  if (!msgs) return;
-
-  const div = document.createElement('div');
-  div.className = 'msg-ai countdown-bubble';
-  msgs.appendChild(div);
-  msgs.scrollTop = msgs.scrollHeight;
-
-  let remaining = Math.ceil(waitMs / 1000);
-
-  function tick() {
-    div.textContent = `⏳ Gemini rate limit hit. Retrying in ${remaining}s…`;
-    if (remaining <= 0) {
-      div.textContent = '🔄 Retrying now…';
-      clearInterval(timer);
-      if (onRetry) onRetry(div);
-    }
-    remaining--;
+  // Use historical test data if available, otherwise check active form values
+  if (history && history.length > 0) {
+    const lastTest = history[history.length - 1];
+    soilData = {
+      score: lastTest.score,
+      ph: lastTest.ph,
+      n: lastTest.n,
+      p: lastTest.p,
+      k: lastTest.k,
+      moisture: lastTest.moisture || soilValues.moisture,
+      oc: lastTest.oc || soilValues.oc
+    };
+  } else if (soilValues && typeof soilValues.ph !== 'undefined') {
+    soilData = {
+      score: null,
+      ph: soilValues.ph,
+      n: soilValues.n,
+      p: soilValues.p,
+      k: soilValues.k,
+      moisture: soilValues.moisture,
+      oc: soilValues.oc
+    };
   }
 
-  tick();
-  const timer = setInterval(tick, 1000);
-  return { div, timer };
+  if (!soilData) {
+    return "";
+  }
+
+  // Calculate score and recommendations on the fly using mittiseva's algorithm
+  let score = soilData.score;
+  let recs = null;
+  if (typeof window.analyseSoil === 'function') {
+    recs = window.analyseSoil(soilData);
+    if (score === null || typeof score === 'undefined') {
+      score = recs.score;
+    }
+  }
+
+  const cropsStr = recs && recs.crops ? recs.crops.map(c => `${c.icon} ${c.name} (${c.season})`).join(', ') : "N/A";
+  const fertsStr = recs && recs.ferts ? recs.ferts.map(f => `${f.icon} ${f.name} (Apply: ${f.dose})`).join(', ') : "N/A";
+
+  return `Farmer Profile:
+- Name: ${farmerName}
+- Location: ${farmerVillage}
+
+Soil Analysis Data:
+- Soil Health Score: ${score}/100
+- pH: ${soilData.ph}
+- Nitrogen (N): ${soilData.n} kg/ha
+- Phosphorus (P): ${soilData.p} kg/ha
+- Potassium (K): ${soilData.k} kg/ha
+- Recommended Crops: ${cropsStr}
+- Recommended Fertilizers: ${fertsStr}`;
 }
 
-// ── Build Gemini request body ──
-function buildRequestBody(chatId) {
+// ── System Prompt ──
+function buildSystemPrompt() {
+  const basePrompt = "You are Krishi AI, an intelligent agriculture assistant for Indian farmers. Help users with soil health, fertilizers, crop recommendations, irrigation, pest control, organic farming, weather-related farming advice, and agricultural best practices. Use simple language and provide practical recommendations.";
+  
+  const soilContext = getSoilContext();
+  let prompt = basePrompt;
+
+  if (soilContext) {
+    prompt += `\n\nHere is the current farmer's soil analysis context:\n${soilContext}\nUse this personalized information to provide precise and customized answers for this farmer.`;
+  }
+
+  prompt += `\n\nInstructions:
+1. Respond in Telugu if the user writes in Telugu; English otherwise.
+2. Use simple, clear, and practical village-level language.
+3. Keep answers conversational, friendly, and under 4-5 lines unless a detailed step-by-step guidance is necessary.`;
+
+  return prompt;
+}
+
+// ── Build OpenAI-compatible request body ──
+function buildOpenRouterRequestBody(chatId) {
+  const messages = [
+    { role: "system", content: buildSystemPrompt() }
+  ];
+
+  // Map Gemini-structured or OpenAI-structured history to OpenAI standard messages array
+  for (const h of chatHistory[chatId]) {
+    const role = h.role === "model" || h.role === "assistant" ? "assistant" : "user";
+    let content = "";
+    if (typeof h.content === "string") {
+      content = h.content;
+    } else if (h.parts && h.parts[0] && h.parts[0].text) {
+      content = h.parts[0].text;
+    } else if (typeof h.text === "string") {
+      content = h.text;
+    }
+    messages.push({ role, content });
+  }
+
   return {
-    system_instruction: { parts: [{ text: buildSystemPrompt() }] },
-    contents: chatHistory[chatId].map(h => ({ role: h.role, parts: h.parts })),
-    generationConfig: {
-      temperature: 0.7,
-      topK: 40,
-      topP: 0.95,
-      maxOutputTokens: 800
-    },
-    safetySettings: [
-      { category: 'HARM_CATEGORY_HARASSMENT',        threshold: 'BLOCK_NONE' },
-      { category: 'HARM_CATEGORY_HATE_SPEECH',       threshold: 'BLOCK_NONE' },
-      { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
-      { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' }
-    ]
+    messages: messages,
+    temperature: 0.7,
+    max_tokens: 800
   };
 }
 
-// ── Send to Gemini with auto-retry ──
-async function sendToGemini(userMessage, chatId, msgsContainerId) {
-  chatHistory[chatId].push({ role: 'user', parts: [{ text: userMessage }] });
-  const body = buildRequestBody(chatId);
-
-  // Try primary model first
-  try {
-    return await fetchWithRetry(GEMINI_PRIMARY, body);
-  } catch (err) {
-    if (err?.isRateLimit) {
-      // Show countdown and retry after wait
-      return new Promise((resolve, reject) => {
-        showCountdownBubble(msgsContainerId, err.waitMs, async (countdownDiv) => {
-          try {
-            const resp = await fetchWithRetry(GEMINI_PRIMARY, body, 1);
-            countdownDiv?.remove();
-            resolve(resp);
-          } catch (e2) {
-            // Try fallback model with separate quota
-            try {
-              console.log('[KrishiAI] Trying fallback model:', GEMINI_FALLBACK);
-              const resp2 = await fetchWithRetry(GEMINI_FALLBACK, body, 1);
-              countdownDiv?.remove();
-              resolve(resp2);
-            } catch (e3) {
-              countdownDiv?.remove();
-              reject(e3 instanceof Error ? e3 : new Error(String(e3)));
-            }
-          }
-        });
-      });
-    }
-    throw err;
-  }
-}
-
-// ── Parse SSE stream ──
-async function readGeminiStream(response, onChunk, onDone) {
+// ── Parse standard OpenAI SSE stream ──
+async function readOpenRouterStream(response, onChunk, onDone) {
   const reader  = response.body.getReader();
   const decoder = new TextDecoder('utf-8');
   let buffer    = '';
@@ -238,17 +138,18 @@ async function readGeminiStream(response, onChunk, onDone) {
     buffer = lines.pop();
 
     for (const line of lines) {
-      if (!line.startsWith('data: ')) continue;
-      const jsonStr = line.slice(6).trim();
+      const trimmed = line.trim();
+      if (!trimmed.startsWith('data: ')) continue;
+      const jsonStr = trimmed.slice(6).trim();
       if (jsonStr === '[DONE]') continue;
       try {
         const parsed = JSON.parse(jsonStr);
-        const text = parsed?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        const text = parsed?.choices?.[0]?.delta?.content || '';
         if (text) {
           fullText += text;
           onChunk(text, fullText);
         }
-      } catch (_) { /* incomplete chunk */ }
+      } catch (_) { /* incomplete or comments line */ }
     }
   }
 
@@ -267,6 +168,7 @@ function showTypingIndicator(containerId) {
   msgs.scrollTop = msgs.scrollHeight;
 }
 
+// ── Remove typing indicator ──
 function removeTypingIndicator(containerId) {
   const el = document.getElementById(`typing-${containerId}`);
   if (el) el.remove();
@@ -288,17 +190,17 @@ function getOfflineFallbackMessage(userMessage) {
   const isTe = window.currentLang === 'te';
   const msg = (userMessage || '').toLowerCase();
   
-  const busyMsg = isTe 
-    ? '⏳ కృషి AI తాత్కాలికంగా బిజీగా ఉంది. దయచేసి ఒక నిమిషం తర్వాత మళ్లీ ప్రయత్నించండి.' 
-    : '⏳ Krishi AI is temporarily busy. Please try again in a minute.';
+  const unavailableMsg = isTe 
+    ? 'Krishi AI తాత్కాలికంగా అందుబాటులో లేదు.' 
+    : 'Krishi AI is temporarily unavailable.';
 
   if (typeof analyseSoil !== 'function' || !window.soilValues) {
-    return busyMsg;
+    return unavailableMsg;
   }
 
   try {
     const res = analyseSoil(window.soilValues);
-    if (!res) return busyMsg;
+    if (!res) return unavailableMsg;
 
     const cropList = res.crops ? res.crops.map(c => `${c.icon} ${c.name}`).join(', ') : '';
     const fertList = res.ferts ? res.ferts.map(f => `${f.icon} ${f.name} (${f.dose})`).join(', ') : '';
@@ -315,7 +217,7 @@ function getOfflineFallbackMessage(userMessage) {
     const isPest = msg.includes('pest') || msg.includes('disease') || msg.includes('insect') || msg.includes('పురుగు') || msg.includes('తెగులు');
 
     if (isTe) {
-      let advice = `${busyMsg}\n\n🤖 **స్థానిక కృషి సలహాదారు (ఆఫ్‌లైన్ మోడ్):**\n`;
+      let advice = `${unavailableMsg}\n\n🤖 **స్థానిక కృషి సలహాదారు (ఆఫ్‌లైన్ మోడ్):**\n`;
       
       if (isYellowLeaves) {
         advice += `• **ఆకులు పసుపు రంగులోకి మారడం:** ఇది సాధారణంగా నత్రజని లోపాన్ని (Nitrogen deficiency) సూచిస్తుంది. మీ మట్టిలో నత్రజని స్థాయి: ${window.soilValues.n} kg/ha (ఇది ${res.nS === 'low' ? 'చాలా తక్కువ' : 'సముచితం'}). లోపం ఉంటే, తగిన మోతాదులో యూరియా వేయండి.\n`;
@@ -344,7 +246,7 @@ function getOfflineFallbackMessage(userMessage) {
           advice += `  - ${c.icon} **${c.name}** (సీజన్: ${c.season === 'Kharif' ? 'ఖరీఫ్' : 'రబీ/ఖరీఫ్'})\n`;
         });
       } else if (isHello) {
-        advice += `• నమస్తే! నేను కృషి AIని. ప్రస్తుతం సర్వర్ బిజీగా ఉన్నందున నేను మీ మట్టి పరీక్ష విలువల ఆధారంగా సమాధానాలు ఇస్తున్నాను. మీ మట్టి ఆరోగ్యం, పంటలు లేదా ఎరువుల గురించి నన్ను ఏదైనా అడగండి.`;
+        advice += `• నమస్తే! నేను కృషి AIని. ప్రస్తుతం సర్వర్ అందుబాటులో లేనందున నేను మీ మట్టి పరీక్ష విలువల ఆధారంగా సమాధానాలు ఇస్తున్నాను. మీ మట్టి ఆరోగ్యం, పంటలు లేదా ఎరువుల గురించి నన్ను ఏదైనా అడగండి.`;
       } else {
         advice += `• మీ మట్టి ఆరోగ్య స్కోరు: **${res.score}/100**\n`;
         if (cropList) advice += `• సిఫార్సు చేసిన పంటలు: ${cropList}\n`;
@@ -353,7 +255,7 @@ function getOfflineFallbackMessage(userMessage) {
       advice += `\n📋 పూర్తి వివరాల కోసం మెనూలోని **'రిపోర్ట్' (Report)** పేజీని సందర్శించండి.`;
       return advice;
     } else {
-      let advice = `${busyMsg}\n\n🤖 **Krishi Local Expert (Offline Mode):**\n`;
+      let advice = `${unavailableMsg}\n\n🤖 **Krishi Local Expert (Offline Mode):**\n`;
       
       if (isYellowLeaves) {
         advice += `• **Yellowing of Leaves:** This typically indicates Nitrogen deficiency. Your Nitrogen level is: ${window.soilValues.n} kg/ha (which is ${res.nS === 'low' ? 'Low' : 'Optimal'}). If deficient, applying urea in split doses is recommended.\n`;
@@ -382,7 +284,7 @@ function getOfflineFallbackMessage(userMessage) {
           advice += `  - ${c.icon} **${c.name}** (Season: ${c.season})\n`;
         });
       } else if (isHello) {
-        advice += `• Namaste! I am Krishi AI. The AI server is temporarily busy, but I can answer questions using your local soil report values. Ask me about soil health, crops, or fertilizers!`;
+        advice += `• Namaste! I am Krishi AI. The AI server is temporarily unavailable, but I can answer questions using your local soil report values. Ask me about soil health, crops, or fertilizers!`;
       } else {
         advice += `• Soil Health Score: **${res.score}/100**\n`;
         if (cropList) advice += `• Recommended Crops: ${cropList}\n`;
@@ -393,7 +295,7 @@ function getOfflineFallbackMessage(userMessage) {
     }
   } catch (e) {
     console.error('Error generating offline fallback message:', e);
-    return busyMsg;
+    return unavailableMsg;
   }
 }
 
@@ -419,15 +321,6 @@ async function krishiSend(inputId, msgsContainerId, chatId) {
   inputEl.value = '';
   lastRequestTime = now;
 
-  // Check API key (only warn if we aren't using either the frontend key or the backend proxy)
-  if (!useBackendProxy && (!GEMINI_API_KEY || GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY_HERE')) {
-    appendMsgUI('user', userMessage, msgsContainerId);
-    appendMsgUI('ai',
-      '⚠️ Gemini API key is missing. Get a free key at https://aistudio.google.com/apikey and add it to config.js or set GEMINI_API_KEY in the backend .env file 🙏',
-      msgsContainerId);
-    return;
-  }
-
   // Show user message
   appendMsgUI('user', userMessage, msgsContainerId);
   if (typeof saveChatMessage === 'function') saveChatMessage('user', userMessage);
@@ -441,13 +334,29 @@ async function krishiSend(inputId, msgsContainerId, chatId) {
   if (sendBtn) sendBtn.disabled = true;
 
   try {
-    const response = await sendToGemini(userMessage, chatId, msgsContainerId);
+    chatHistory[chatId].push({ role: 'user', content: userMessage });
+    const body = buildOpenRouterRequestBody(chatId);
+
+    const host = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+      ? 'http://localhost:5000'
+      : '';
+
+    const response = await fetch(`${host}/api/chat/stream`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+
+    if (!response.ok) {
+      const errText = await response.text();
+      throw new Error(`Proxy returned status ${response.status}: ${errText}`);
+    }
 
     removeTypingIndicator(msgsContainerId);
     const bubble = createStreamingBubble(msgsContainerId);
     let finalText = '';
 
-    await readGeminiStream(
+    await readOpenRouterStream(
       response,
       (chunk, full) => {
         if (bubble) {
@@ -463,44 +372,20 @@ async function krishiSend(inputId, msgsContainerId, chatId) {
       }
     );
 
-    chatHistory[chatId].push({ role: 'model', parts: [{ text: finalText }] });
+    chatHistory[chatId].push({ role: 'assistant', content: finalText });
     if (typeof saveChatMessage === 'function' && finalText) saveChatMessage('ai', finalText);
 
   } catch (err) {
+    console.error('[KrishiAI] Error calling OpenRouter proxy:', err);
     removeTypingIndicator(msgsContainerId);
 
-    // Safely extract a readable message from any error type
-    let msg;
-    if (err instanceof Error) {
-      msg = err.message || 'Unknown error';
-    } else if (typeof err === 'string') {
-      msg = err;
-    } else {
-      try { msg = JSON.stringify(err); } catch (_) { msg = 'Unknown error'; }
+    // Call Local Soil Expert offline mode fallback on error
+    const offlineAdvice = getOfflineFallbackMessage(userMessage);
+    appendMsgUI('ai', offlineAdvice, msgsContainerId);
+
+    if (typeof saveChatMessage === 'function') {
+      saveChatMessage('ai', offlineAdvice);
     }
-
-    // Map to user-friendly messages
-    let errorMsg;
-    const isTe = window.currentLang === 'te';
-    if (msg.includes('API_KEY_INVALID') || msg.includes('400')) {
-      errorMsg = isTe ? '❌ చెల్లని జెమినీ API కీ.' : '❌ Invalid Gemini API key. Please check config.js.';
-    } else if (msg.includes('403')) {
-      errorMsg = isTe ? '❌ కీ ప్రామాణీకరించబడలేదు.' : '❌ API key not authorized. Check Google AI Studio settings.';
-    } else if (msg.includes('QUOTA_EXHAUSTED')) {
-      errorMsg = getOfflineFallbackMessage(userMessage);
-    } else if (msg.includes('RATE_LIMIT') || msg.includes('429') || msg.includes('Rate limit')) {
-      errorMsg = getOfflineFallbackMessage(userMessage);
-    } else if (msg.includes('404')) {
-      errorMsg = isTe ? '❌ మోడల్ కనుగొనబడలేదు.' : '❌ AI model not found. Please hard-reload the page (Ctrl+Shift+R).';
-    } else if (!navigator.onLine) {
-      errorMsg = isTe ? '📡 ఇంటర్నెట్ కనెక్షన్ లేదు.' : '📡 No internet connection. Please check your network.';
-    } else {
-      errorMsg = isTe ? `⚠️ లోపం సంభవించింది: ${msg.substring(0, 100)}` : `⚠️ Krishi AI error: ${msg.substring(0, 150)}`;
-    }
-
-
-    appendMsgUI('ai', errorMsg, msgsContainerId);
-    console.error('[KrishiAI]', err);
 
     // Roll back last user message from history on failure
     if (chatHistory[chatId]?.at(-1)?.role === 'user') {
@@ -568,4 +453,4 @@ if (document.readyState === 'loading') {
   setTimeout(initChatUI, 800);
 }
 
-console.log('[KrishiAI] Gemini AI engine v3 loaded ✓');
+console.log('[KrishiAI] OpenRouter AI engine loaded ✓');

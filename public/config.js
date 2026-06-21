@@ -24,9 +24,8 @@ if (typeof window.supabase !== 'undefined' && typeof window.supabase.createClien
   window.supabase = null;
 }
 // ==========================================
-// KRISHI AI  ·  GEMINI CONFIGURATION
+// KRISHI AI CONFIGURATION
 // ==========================================
-// Get a FREE API key at: https://aistudio.google.com/apikey
-// Then replace the placeholder below:
+// MittiSeva now uses OpenRouter AI.
+// The API key is securely managed on the backend server.
 // ==========================================
-window.GEMINI_API_KEY = window.env?.GEMINI_API_KEY || '';

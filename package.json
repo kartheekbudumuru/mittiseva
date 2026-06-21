@@ -10,7 +10,6 @@
     "dev": "concurrently \"npm run start-frontend\" \"nodemon server.js\""
   },
   "dependencies": {
-    "@google/genai": "^2.9.0",
     "concurrently": "^8.2.2",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",

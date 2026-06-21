@@ -1022,8 +1022,8 @@ async function loadChatHistory() {
       appendMsgUI(item.sender, item.message, 'chatMsgs');
       appendMsgUI(item.sender, item.message, 'chatMsgsFull');
       // Also push into ai_engine memory so Krishi AI has context
-      const role = item.sender === 'ai' ? 'model' : 'user';
-      const part = { role, parts: [{ text: item.message }] };
+      const role = item.sender === 'ai' ? 'assistant' : 'user';
+      const part = { role, content: item.message };
       if (typeof chatHistory !== 'undefined') {
         chatHistory.full.push(part);
         chatHistory.mobile.push(part);
