@@ -283,6 +283,45 @@ function createStreamingBubble(containerId) {
   return div;
 }
 
+// ── Offline Fallback Guidance ──
+function getOfflineFallbackMessage() {
+  const isTe = window.currentLang === 'te';
+  const busyMsg = isTe 
+    ? '⏳ కృషి AI తాత్కాలికంగా బిజీగా ఉంది. దయచేసి ఒక నిమిషం తర్వాత మళ్లీ ప్రయత్నించండి.' 
+    : '⏳ Krishi AI is temporarily busy. Please try again in a minute.';
+  
+  if (typeof analyseSoil !== 'function' || !window.soilValues) {
+    return busyMsg;
+  }
+
+  try {
+    const res = analyseSoil(window.soilValues);
+    if (!res) return busyMsg;
+
+    const cropList = res.crops ? res.crops.map(c => `${c.icon} ${c.name}`).join(', ') : '';
+    const fertList = res.ferts ? res.ferts.map(f => `${f.icon} ${f.name} (${f.dose})`).join(', ') : '';
+
+    if (isTe) {
+      let advice = `${busyMsg}\n\n📢 **మట్టి విశ్లేషణ నుండి త్వరిత సలహా:**\n`;
+      advice += `• **ఆరోగ్య స్కోరు:** ${res.score}/100\n`;
+      if (cropList) advice += `• **సిఫార్సు చేసిన పంటలు:** ${cropList}\n`;
+      if (fertList) advice += `• **సూచించిన ఎరువులు:** ${fertList}\n`;
+      advice += `\n📋 పూర్తి వివరాల కోసం మెనూలోని **'రిపోర్ట్' (Report)** పేజీని సందర్శించండి.`;
+      return advice;
+    } else {
+      let advice = `${busyMsg}\n\n📢 **Quick guidance based on your soil data:**\n`;
+      advice += `• **Soil Health Score:** ${res.score}/100\n`;
+      if (cropList) advice += `• **Recommended Crops:** ${cropList}\n`;
+      if (fertList) advice += `• **Suggested Fertilizers:** ${fertList}\n`;
+      advice += `\n📋 For a detailed PDF, visit the **'Report'** page in the menu.`;
+      return advice;
+    }
+  } catch (e) {
+    console.error('Error generating offline fallback message:', e);
+    return busyMsg;
+  }
+}
+
 // ── Core send function ──
 async function krishiSend(inputId, msgsContainerId, chatId) {
   const inputEl = document.getElementById(inputId);
@@ -373,9 +412,9 @@ async function krishiSend(inputId, msgsContainerId, chatId) {
     } else if (msg.includes('403')) {
       errorMsg = isTe ? '❌ కీ ప్రామాణీకరించబడలేదు.' : '❌ API key not authorized. Check Google AI Studio settings.';
     } else if (msg.includes('QUOTA_EXHAUSTED')) {
-      errorMsg = isTe ? '⏳ కృషి AI తాత్కాలికంగా బిజీగా ఉంది. దయచేసి ఒక నిమిషం తర్వాత మళ్లీ ప్రయత్నించండి.' : '⏳ Krishi AI is temporarily busy. Please try again in a minute.';
+      errorMsg = getOfflineFallbackMessage();
     } else if (msg.includes('RATE_LIMIT') || msg.includes('429') || msg.includes('Rate limit')) {
-      errorMsg = isTe ? '⏳ అభ్యర్థనల పరిమితి దాటింది. దయచేసి 1-2 నిమిషాలు వేచి ఉండండి.' : '⏳ Rate limit reached. Please wait 1–2 minutes. (Free Gemini = 15 requests/min)';
+      errorMsg = getOfflineFallbackMessage();
     } else if (msg.includes('404')) {
       errorMsg = isTe ? '❌ మోడల్ కనుగొనబడలేదు.' : '❌ AI model not found. Please hard-reload the page (Ctrl+Shift+R).';
     } else if (!navigator.onLine) {
