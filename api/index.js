@@ -4,6 +4,9 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
+console.log("GEMINI_API_KEY loaded:", !!process.env.GEMINI_API_KEY);
+console.log("GEMINI_API_KEY length:", process.env.GEMINI_API_KEY ? process.env.GEMINI_API_KEY.length : 0);
+
 const app = express();
 
 app.use(cors());
