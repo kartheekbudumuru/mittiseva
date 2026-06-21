@@ -210,6 +210,95 @@ const TRANSLATIONS = {
     'chat-title-mobile': '🌿 కృషి AI అసిస్టెంట్',
     'chat-welcome-mobile': 'నమస్తే! నేను కృషి AI. మట్టి, పంటలు లేదా ఎరువుల గురించి నన్ను ఏదైనా అడగండి. నేను మీకు సహాయం చేయడానికి ఇక్కడ ఉన్నాను! 🌿',
     'chat-fab-lbl': 'కృషి AIని అడగండి'
+  },
+  hi: {
+    'hero-tag': '🇮🇳 मुफ़्त सरकारी सेवा · आंध्र प्रदेश और तेलंगाना',
+    'hero-title': 'अपनी मिट्टी जानें।<br>अपना भविष्य उगाएं।',
+    'hero-sub': 'आंध्र प्रदेश और तेलंगाना के हर किसान के लिए मुफ़्त मिट्टी परीक्षण और फसल सलाह। हफ्तों नहीं, मिनटों में परिणाम।',
+    'btn-analyse': '🔬 मेरी मिट्टी का परीक्षण करें',
+    'btn-hero-login': 'लॉगिन / पंजीकरण',
+    'what-you-get': 'आपको क्या मिलेगा',
+    'feature-title': 'किसान की हर ज़रूरत',
+    'feat-soil-title': 'मिट्टी विश्लेषण',
+    'feat-soil-desc': 'pH, N, P, K, नमी और जैविक कार्बन की जाँच करें',
+    'feat-fert-title': 'उर्वरक सुझाव',
+    'feat-fert-desc': 'सही उर्वरक, सही मात्रा, सही समय',
+    'feat-crop-title': 'फसल गाइड',
+    'feat-crop-desc': 'आपकी मिट्टी के लिए सर्वोत्तम फसलें',
+    'feat-rep-title': 'स्वास्थ्य रिपोर्ट',
+    'feat-rep-desc': 'डाउनलोड करें और कृषि अधिकारी से साझा करें',
+    'test-title': '2.4 लाख+ किसानों का भरोसा',
+    'test-sub': 'AP और तेलंगाना के 13 जिलों में',
+    'test-body': '"मिट्टी परीक्षण के बाद मैंने कपास छोड़ मूंगफली लगाई। इस सीज़न में आमदनी 40% बढ़ी।"<br><strong>— रमैया, कुर्नूल</strong>',
+    'btn-start-test': '🔬 मिट्टी परीक्षण शुरू करें',
+    'btn-view-past': 'मेरे पुराने परीक्षण देखें',
+    'btn-chat-home-lbl': 'कृषि AI',
+    'btn-login-reg': 'लॉगिन',
+    'authTitle': 'वापस स्वागत है',
+    'authSub': 'जारी रखने के लिए अपना विवरण दर्ज करें।',
+    'label-name': 'पूरा नाम',
+    'label-phone': 'फ़ोन नंबर',
+    'label-village': 'गाँव / स्थान',
+    'label-pass': 'पासवर्ड',
+    'btn-auth-submit': 'लॉगिन →',
+    'auth-switch-text': 'नए हैं? पंजीकरण करें',
+    'form-title': 'अपनी मिट्टी का विवरण दर्ज करें',
+    'form-sub': 'स्लाइडर्स को हिलाएं या मिट्टी परीक्षण रिपोर्ट से मान टाइप करें।',
+    'btn-run-analysis': '🔬 मिट्टी विश्लेषण करें',
+    'results-title': 'आपके मिट्टी के परिणाम',
+    'results-sub': 'आपकी मिट्टी आपसे यह कह रही है।',
+    'res-nut-title': 'पोषक तत्व स्थिति',
+    'res-nut-sub': 'आपके रीडिंग के आधार पर',
+    'res-fert-title': '🌱 उर्वरक सिफारिशें',
+    'res-crop-title': '🌾 फसल सिफारिशें',
+    'btn-gen-report': '📋 रिपोर्ट बनाएं',
+    'btn-retest': 'नए मानों के साथ फिर से परीक्षण करें',
+    'report-title': 'मिट्टी स्वास्थ्य रिपोर्ट',
+    'report-sub': 'डाउनलोड करने और कृषि अधिकारी से साझा करने के लिए तैयार।',
+    'rep-cert': 'मिट्टी परीक्षण प्रमाण पत्र',
+    'rep-gov': 'आंध्र प्रदेश सरकार · कृषि विभाग',
+    'rep-sec-farmer': 'किसान विवरण',
+    'rep-label-name': 'नाम',
+    'rep-label-village': 'गाँव',
+    'rep-label-date': 'परीक्षण तिथि',
+    'rep-sec-score': 'स्वास्थ्य स्कोर',
+    'rep-lbl-score': '100 अंकों में से',
+    'rep-sec-readings': 'मिट्टी रीडिंग',
+    'rep-sec-recs': 'सिफारिशें',
+    'btn-print': '⬇ रिपोर्ट डाउनलोड / प्रिंट करें',
+    'btn-share': '📤 रिपोर्ट साझा करें',
+    'btn-view-hist': 'मेरा मिट्टी इतिहास देखें →',
+    'history-title': 'मेरा मिट्टी इतिहास',
+    'history-sub': 'आपके सभी पुराने मिट्टी परीक्षण एक जगह।',
+    'hist-chart-title': 'समय के साथ स्वास्थ्य स्कोर',
+    'hist-lbl-latest': 'नवीनतम स्कोर',
+    'hist-lbl-imp': 'सुधार',
+    'hist-lbl-tests': 'किए गए परीक्षण',
+    'hist-tbl-title': 'सभी परीक्षण रिकॉर्ड',
+    'hist-th-date': 'तारीख',
+    'hist-th-ph': 'pH',
+    'hist-th-n': 'N (kg/ha)',
+    'hist-th-score': 'स्कोर',
+    'btn-quick-retest': '🔬 त्वरित पुनः परीक्षण',
+    'sb-lbl-home': 'होम',
+    'sb-lbl-profile': 'प्रोफाइल',
+    'sb-lbl-analyse': 'मिट्टी परीक्षण',
+    'sb-lbl-results': 'परिणाम',
+    'sb-lbl-report': 'रिपोर्ट',
+    'sb-lbl-history': 'इतिहास',
+    'sb-lbl-chat': 'कृषि AI',
+    'sb-lbl-logout': 'लॉगआउट',
+    'btnLogout': 'लॉगआउट',
+    'sidebar-sub': 'मिट्टी सत्यनिष्ठा',
+    'chat-title-full': 'कृषि AI सहायक',
+    'chat-sub-full': 'मिट्टी स्वास्थ्य, फसलों या उर्वरकों के बारे में कुछ भी पूछें।',
+    'bn-lbl-home': 'होम',
+    'bn-lbl-analyse': 'विश्लेषण',
+    'bn-lbl-results': 'परिणाम',
+    'bn-lbl-history': 'इतिहास',
+    'chat-title-mobile': '🌿 कृषि AI सहायक',
+    'chat-welcome-mobile': 'नमस्ते! मैं कृषि AI हूँ। मिट्टी, फसलों या उर्वरकों के बारे में कुछ भी पूछें। मैं आपकी मदद के लिए यहाँ हूँ! 🌿',
+    'chat-fab-lbl': 'कृषि AI से पूछें'
   }
 };
 
@@ -233,9 +322,11 @@ function showPage(id) {
   // Route Guard
   const protectedPages = ['results', 'report', 'dashboard', 'chat', 'form'];
   if (protectedPages.includes(id) && (!supabase || !currentUser)) {
-    alert(currentLang === 'en' 
-      ? "Please Login or Register to access this feature." 
-      : "దయచేసి ఈ సేవను ఉపయోగించడానికి లాగిన్ లేదా రిజిస్టర్ అవ్వండి.");
+    alert(
+      currentLang === 'en' ? 'Please Login or Register to access this feature.' :
+      currentLang === 'te' ? 'దయచేసి ఈ సేవను ఉపయోగించడానికి లాగిన్ లేదా రిజిస్టర్ అవ్వండి.' :
+      'कृपया इस सुविधा का उपयोग करने के लिए लॉगिन या पंजीकरण करें।'
+    );
     showPage('auth');
     return;
   }
@@ -256,13 +347,13 @@ function showPage(id) {
 
   // Update top header page title
   const titleMap = {
-    'landing': currentLang === 'en' ? 'Home Explorer' : 'హోమ్ ఎక్స్‌ప్లోరర్',
-    'auth': currentLang === 'en' ? 'Farmer Profile' : 'రైతు ప్రొఫైల్',
-    'form': currentLang === 'en' ? 'Soil Health Analysis' : 'మట్టి పరీక్ష విశ్లేషణ',
-    'results': currentLang === 'en' ? 'Analysis Results' : 'పరీక్ష ఫలితాలు',
-    'report': currentLang === 'en' ? 'Soil Health Report' : 'మట్టి ఆరోగ్య నివేదిక',
-    'dashboard': currentLang === 'en' ? 'Soil History Dashboard' : 'మట్టి చరిత్ర డ్యాష్‌బోర్డ్',
-    'chat': currentLang === 'en' ? 'Krishi AI Assistant' : 'కృషి AI అసిస్టెంట్'
+    'landing':   currentLang === 'en' ? 'Home Explorer'          : currentLang === 'te' ? 'హోమ్ ఎక్స్‌ప్లోరర్'      : 'होम',
+    'auth':      currentLang === 'en' ? 'Farmer Profile'         : currentLang === 'te' ? 'రైతు ప్రొఫైల్'           : 'किसान प्रोफाइल',
+    'form':      currentLang === 'en' ? 'Soil Health Analysis'   : currentLang === 'te' ? 'మట్టి పరీక్ష విశ్లేషణ'     : 'मिट्टी परीक्षण',
+    'results':   currentLang === 'en' ? 'Analysis Results'       : currentLang === 'te' ? 'పరీక్ష ఫలితాలు'          : 'विश्लेषण परिणाम',
+    'report':    currentLang === 'en' ? 'Soil Health Report'     : currentLang === 'te' ? 'మట్టి ఆరోగ్య నివేదిక'     : 'मिट्टी रिपोर्ट',
+    'dashboard': currentLang === 'en' ? 'Soil History Dashboard' : currentLang === 'te' ? 'మట్టి చరిత్ర డ్యాష్‌బోర్డ్' : 'मिट्टी इतिहास',
+    'chat':      currentLang === 'en' ? 'Krishi AI Assistant'    : currentLang === 'te' ? 'కృషి AI అసిస్టెంట్'       : 'कृषि AI सहायक'
   };
   const headerTitle = document.getElementById('header-page-title');
   if (headerTitle) {
@@ -282,10 +373,30 @@ function showPage(id) {
 }
 
 // ══ Language ══
-function toggleLang() {
-  currentLang = currentLang === 'en' ? 'te' : 'en';
-  document.getElementById('langBtn').textContent = currentLang === 'en' ? 'తెలుగు' : 'English';
+function setLang(lang) {
+  currentLang = lang;
+  // Update active pill highlights
+  ['en','te','hi'].forEach(l => {
+    const btn = document.getElementById('lang-pill-' + l);
+    if (btn) btn.classList.toggle('active', l === lang);
+  });
   translateUI();
+  // Re-render current page title
+  const activePage = document.querySelector('.page.active');
+  if (activePage) {
+    const pageId = activePage.id.replace('page-', '');
+    const titleMap = {
+      'landing':   lang === 'en' ? 'Home Explorer'         : lang === 'te' ? 'హోమ్ ఎక్స్‌ప్లోరర్'      : 'होम',
+      'auth':      lang === 'en' ? 'Farmer Profile'        : lang === 'te' ? 'రైతు ప్రొఫైల్'           : 'किसान प्रोफाइल',
+      'form':      lang === 'en' ? 'Soil Health Analysis'  : lang === 'te' ? 'మట్టి పరీక్ష విశ్లేషణ'     : 'मिट्टी परीक्षण',
+      'results':   lang === 'en' ? 'Analysis Results'      : lang === 'te' ? 'పరీక్ష ఫలితాలు'          : 'विश्लेषण परिणाम',
+      'report':    lang === 'en' ? 'Soil Health Report'    : lang === 'te' ? 'మట్టి ఆరోగ్య నివేదిక'     : 'मिट्टी रिपोर्ट',
+      'dashboard': lang === 'en' ? 'Soil History Dashboard': lang === 'te' ? 'మట్టి చరిత్ర డ్యాష్‌బోర్డ్' : 'मिट्टी इतिहास',
+      'chat':      lang === 'en' ? 'Krishi AI Assistant'   : lang === 'te' ? 'కృషి AI అసిస్టెంట్'       : 'कृषि AI सहायक'
+    };
+    const ht = document.getElementById('header-page-title');
+    if (ht) ht.textContent = titleMap[pageId] || 'MittiSeva';
+  }
 }
 
 // ══ Auth ══
@@ -1088,6 +1199,7 @@ function toggleAuthUI(isLoggedIn) {
 
   TRANSLATIONS.en['sb-lbl-profile'] = isLoggedIn ? 'Profile' : 'Login';
   TRANSLATIONS.te['sb-lbl-profile'] = isLoggedIn ? 'ప్రొఫైల్' : 'లాగిన్';
+  TRANSLATIONS.hi['sb-lbl-profile'] = isLoggedIn ? 'प्रोफाइल' : 'लॉगिन';
   translateUI();
 }
 

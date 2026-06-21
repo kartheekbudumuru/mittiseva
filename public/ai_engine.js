@@ -79,7 +79,7 @@ Soil Analysis Data:
 // ── System Prompt ──
 function buildSystemPrompt() {
   const basePrompt = "You are Krishi AI, an intelligent agriculture assistant for Indian farmers. Help users with soil health, fertilizers, crop recommendations, irrigation, pest control, organic farming, weather-related farming advice, and agricultural best practices. Use simple language and provide practical recommendations.";
-  
+
   const soilContext = getSoilContext();
   let prompt = basePrompt;
 
@@ -87,8 +87,15 @@ function buildSystemPrompt() {
     prompt += `\n\nHere is the current farmer's soil analysis context:\n${soilContext}\nUse this personalized information to provide precise and customized answers for this farmer.`;
   }
 
+  // Detect app language and instruct AI to respond accordingly
+  const lang = window.currentLang || 'en';
+  const langInstruction =
+    lang === 'te' ? 'Always respond in Telugu (తెలుగు) unless the user writes in a different language.' :
+    lang === 'hi' ? 'Always respond in Hindi (हिंदी) unless the user writes in a different language.' :
+                    'Respond in Telugu if the user writes in Telugu, Hindi if the user writes in Hindi, and English otherwise.';
+
   prompt += `\n\nInstructions:
-1. Respond in Telugu if the user writes in Telugu; English otherwise.
+1. ${langInstruction}
 2. Use simple, clear, and practical village-level language.
 3. Keep answers conversational, friendly, and under 4-5 lines unless a detailed step-by-step guidance is necessary.`;
 
