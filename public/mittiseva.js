@@ -49,6 +49,9 @@ const TRANSLATIONS = {
     'feat-crop-desc': 'Best crops suited to your exact soil',
     'feat-rep-title': 'Health Report',
     'feat-rep-desc': 'Download & share with your agriculture officer',
+    'crop-adv-title': 'Seasonal Crop Advisory',
+    'crop-adv-sub': 'Expert agricultural advice for AP & Telangana',
+    'crop-adv-body': 'Rotate cereals (like Paddy) with legumes (like Groundnut/Green Gram) to naturally replenish soil nitrogen and prevent pest cycles. Use micro-irrigation for Rabi crops.',
     'btn-start-test': '🔬 Start Soil Analysis',
     'btn-view-past': 'View My Past Tests',
     'btn-chat-home-lbl': 'Krishi AI',
@@ -135,6 +138,9 @@ const TRANSLATIONS = {
     'feat-crop-desc': 'మీ మట్టికి సరిపోయే ఉత్తమ పంటలు',
     'feat-rep-title': 'ఆరోగ్య నివేదిక',
     'feat-rep-desc': 'డౌన్‌లోడ్ చేసి వ్యవసాయ అధికారితో పంచుకోండి',
+    'crop-adv-title': 'పంట సాగు సలహా',
+    'crop-adv-sub': 'ఆంధ్రప్రదేశ్ & తెలంగాణ రైతులకు నిపుణుల సలహాలు',
+    'crop-adv-body': 'మట్టిలో నత్రజనిని సహజంగా పెంచడానికి మరియు తెగుళ్ల నివారణకు వరి పంట తర్వాత వేరుశనగ లేదా మినుము వంటి పప్పుధాన్యాలను మార్పిడి పద్ధతిలో సాగు చేయండి.',
     'btn-start-test': '🔬 మట్టి పరీక్షను ప్రారంభించండి',
     'btn-view-past': 'నా పాత పరీక్షలు చూడండి',
     'btn-chat-home-lbl': 'కృషి AI',
@@ -221,6 +227,9 @@ const TRANSLATIONS = {
     'feat-crop-desc': 'आपकी मिट्टी के लिए सर्वोत्तम फसलें',
     'feat-rep-title': 'स्वास्थ्य रिपोर्ट',
     'feat-rep-desc': 'डाउनलोड करें और कृषि अधिकारी से साझा करें',
+    'crop-adv-title': 'मौसमी फसल सलाह',
+    'crop-adv-sub': 'AP और तेलंगाना के लिए विशेषज्ञ कृषि सलाह',
+    'crop-adv-body': 'मिट्टी में नाइट्रोजन को प्राकृतिक रूप से बढ़ाने और कीटों से बचाव के लिए धान के बाद मूंगफली या मूंग जैसी दलहनी फसलों का फसल चक्र (रूटेशन) अपनाएं।',
     'btn-start-test': '🔬 मिट्टी परीक्षण शुरू करें',
     'btn-view-past': 'मेरे पुराने परीक्षण देखें',
     'btn-chat-home-lbl': 'कृषि AI',
@@ -293,113 +302,6 @@ const TRANSLATIONS = {
   }
 };
 
-// ══ Testimonial Carousel Data & Logic ══
-let currentTestimonialIndex = 0;
-let testimonialTimer = null;
-
-const TESTIMONIALS = [
-  {
-    en: {
-      title: "2.4 lakh+ farmers trust MittiSeva",
-      sub: "Across 13 districts in AP & Telangana",
-      body: '"After testing my soil, I switched to groundnut from cotton. My income went up by 40% this season."<br><strong>— Ramaiah, Kurnool</strong>'
-    },
-    te: {
-      title: "2.4 లక్షలకు పైగా నమ్మకమైన రైతులు",
-      sub: "ఆంధ్రప్రదేశ్ & తెలంగాణలోని 13 జిల్లాల్లో",
-      body: '"నా మట్టిని పరీక్షించిన తర్వాత, నేను పత్తి నుండి వేరుశనగకు మారాను. ఈ సీజన్‌లో నా ఆదాయం 40% పెరిగింది."<br><strong>— రామయ్య, కర్నూలు</strong>'
-    },
-    hi: {
-      title: "2.4 लाख+ किसानों का भरोसा",
-      sub: "AP और तेलंगाना के 13 जिलों में",
-      body: '"मिट्टी परीक्षण के बाद मैंने कपास छोड़ मूंगफली लगाई। इस सीज़न में आमदनी 40% बढ़ी।"<br><strong>— रमैया, कुर्नूल</strong>'
-    }
-  },
-  {
-    en: {
-      title: "Scientific Fertilizer Advice",
-      sub: "Smarter investment, better yield",
-      body: '"Checking soil pH and reducing excess urea saved me ₹8,000 on fertilizers for my paddy crop."<br><strong>— Lakshmi, Nalgonda</strong>'
-    },
-    te: {
-      title: "శాస్త్రీయ ఎరువుల సలహాలు",
-      sub: "తెలివైన పెట్టుబడి, మంచి దిగుబడి",
-      body: '"మట్టి pH విలువను తనిఖీ చేసి, యూరియా వాడకాన్ని తగ్గించడం ద్వారా వరి పంటకు ఎరువులపై నాకు ₹8,000 ఆదా అయింది."<br><strong>— లక్ష్మి, నల్గొండ</strong>'
-    },
-    hi: {
-      title: "वैज्ञानिक उर्वरक सलाह",
-      sub: "स्मार्ट निवेश, बेहतर उपज",
-      body: '"मिट्टी के pH की जांच करने और यूरिया का उपयोग कम करने से मुझे धान की फसल के लिए उर्वरकों पर ₹8,000 की बचत हुई।"<br><strong>— लक्ष्मी, नलगोंडा</strong>'
-    }
-  },
-  {
-    en: {
-      title: "Soil Quality Restoration",
-      sub: "Nurturing soil health naturally",
-      body: '"The recommendation on organic carbon and compost helped restore the health of my sweet lime orchard."<br><strong>— Venkat, Anantapur</strong>'
-    },
-    te: {
-      title: "మట్టి నాణ్యత పునరుద్ధరణ",
-      sub: "సహజంగా మట్టి ఆరోగ్యాన్ని పెంచడం",
-      body: '"సేంద్రీయ కర్బనం మరియు కంపోస్ట్ గురించిన సూచనలు నా బత్తాయి తోట మట్టి ఆరోగ్యాన్ని తిరిగి మెరుగుపరచడానికి సహాయపడ్డాయి."<br><strong>— వెంకట్, అనంతపురం</strong>'
-    },
-    hi: {
-      title: "मिट्टी गुणवत्ता सुधार",
-      sub: "मिट्टी के स्वास्थ्य का प्राकृतिक सुधार",
-      body: '"जैविक कार्बन और खाद की सलाह ने मेरे मौसंबी के बाग की मिट्टी के स्वास्थ्य को फिर से सुधारने में मदद की।"<br><strong>— वेंकट, अनंतपुर</strong>'
-    }
-  }
-];
-
-function renderTestimonial() {
-  const t = TESTIMONIALS[currentTestimonialIndex];
-  if (!t) return;
-  const data = t[currentLang] || t['en'];
-  
-  const titleEl = document.getElementById('test-title');
-  const subEl = document.getElementById('test-sub');
-  const bodyEl = document.getElementById('test-body');
-  
-  if (titleEl) titleEl.textContent = data.title;
-  if (subEl) subEl.textContent = data.sub;
-  if (bodyEl) {
-    bodyEl.style.opacity = 0;
-    setTimeout(() => {
-      bodyEl.innerHTML = data.body;
-      bodyEl.style.opacity = 1;
-    }, 150);
-  }
-  
-  // Update dots
-  const dotsContainer = document.getElementById('testimonial-dots');
-  if (dotsContainer) {
-    dotsContainer.innerHTML = TESTIMONIALS.map((_, idx) => `
-      <span class="testimonial-dot ${idx === currentTestimonialIndex ? 'active' : ''}" onclick="setTestimonialSlide(${idx})"></span>
-    `).join('');
-  }
-}
-
-function startTestimonialTimer() {
-  stopTestimonialTimer();
-  testimonialTimer = setInterval(() => {
-    currentTestimonialIndex = (currentTestimonialIndex + 1) % TESTIMONIALS.length;
-    renderTestimonial();
-  }, 5000);
-}
-
-function stopTestimonialTimer() {
-  if (testimonialTimer) {
-    clearInterval(testimonialTimer);
-    testimonialTimer = null;
-  }
-}
-
-function setTestimonialSlide(idx) {
-  currentTestimonialIndex = idx;
-  renderTestimonial();
-  startTestimonialTimer();
-}
-
 // ══ Translation Render ══
 function translateUI() {
   const dict = TRANSLATIONS[currentLang];
@@ -413,7 +315,6 @@ function translateUI() {
       }
     }
   }
-  renderTestimonial();
 }
 
 // ══ Navigation ══
@@ -460,12 +361,6 @@ function showPage(id) {
   }
 
   translateUI();
-
-  if (id === 'landing') {
-    startTestimonialTimer();
-  } else {
-    stopTestimonialTimer();
-  }
 
   window.scrollTo(0,0);
   if (id === 'dashboard') initDashboard();

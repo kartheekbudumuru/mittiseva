@@ -8,8 +8,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="config.js?v=303"></script>
-<link rel="stylesheet" href="mittiseva.css?v=303" />
+<script src="config.js?v=304"></script>
+<link rel="stylesheet" href="mittiseva.css?v=304" />
 </head>
 <body>
 <div class="dashboard-layout">
@@ -137,20 +137,17 @@
     </div>
   </div>
 
-  <div class="testimonial-carousel">
-    <div class="testimonial-slide-content">
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
-        <span style="font-size:32px">👨‍🌾</span>
-        <div>
-          <div style="font-weight:700;font-size:15px" id="test-title">2.4 lakh+ farmers trust MittiSeva</div>
-          <div style="font-size:12px;color:var(--text-light)" id="test-sub">Across 13 districts in AP & Telangana</div>
-        </div>
-      </div>
-      <div style="font-size:13.5px;color:var(--text-mid);font-style:italic;line-height:1.6;min-height:54px;transition:opacity 0.3s ease" id="test-body">
-        "After testing my soil, I switched to groundnut from cotton. My income went up by 40% this season."<br><strong>— Ramaiah, Kurnool</strong>
+  <div class="crop-advisory-card">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+      <span style="font-size:32px">🌾</span>
+      <div>
+        <div style="font-weight:700;font-size:15px" id="crop-adv-title">Seasonal Crop Advisory</div>
+        <div style="font-size:12px;color:var(--text-light)" id="crop-adv-sub">Expert agricultural advice for AP & Telangana</div>
       </div>
     </div>
-    <div class="testimonial-dots" id="testimonial-dots"></div>
+    <div style="font-size:13.5px;color:var(--text-mid);line-height:1.6" id="crop-adv-body">
+      Rotate cereals (like Paddy) with legumes (like Groundnut/Green Gram) to naturally replenish soil nitrogen and prevent pest cycles. Use micro-irrigation for Rabi crops.
+    </div>
   </div>
 
   <div style="padding:0 20px 20px;display:flex;flex-direction:column;gap:10px">
@@ -430,7 +427,7 @@
 </div>
 <button class="chat-fab" onclick="toggleChat()">🌿 <span id="chat-fab-lbl">Ask Krishi AI</span></button>
 
-<script src="mittiseva.js?v=303"></script>
+<script src="mittiseva.js?v=304"></script>
 <script src="ai_engine.js?v=5"></script>
 </body>
 </html>
