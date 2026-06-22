@@ -1377,7 +1377,7 @@ function appendMsgUI(role, text, containerId) {
   const msgs = document.getElementById(containerId);
   if (msgs) {
     msgs.appendChild(div);
-    msgs.scrollTop = msgs.scrollHeight;
+    setTimeout(() => { msgs.scrollTop = msgs.scrollHeight; }, 30);
   }
 }
 

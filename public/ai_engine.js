@@ -178,7 +178,7 @@ function showTypingIndicator(containerId) {
   div.id = `typing-${containerId}`;
   div.innerHTML = '<span></span><span></span><span></span>';
   msgs.appendChild(div);
-  msgs.scrollTop = msgs.scrollHeight;
+  setTimeout(() => { msgs.scrollTop = msgs.scrollHeight; }, 30);
 }
 
 // ── Remove typing indicator ──
@@ -194,7 +194,7 @@ function createStreamingBubble(containerId) {
   const div = document.createElement('div');
   div.className = 'msg-ai msg-streaming';
   msgs.appendChild(div);
-  msgs.scrollTop = msgs.scrollHeight;
+  setTimeout(() => { msgs.scrollTop = msgs.scrollHeight; }, 30);
   return div;
 }
 
@@ -375,7 +375,9 @@ async function krishiSend(inputId, msgsContainerId, chatId) {
         if (bubble) {
           bubble.textContent = full;
           const msgs = document.getElementById(msgsContainerId);
-          if (msgs) msgs.scrollTop = msgs.scrollHeight;
+          if (msgs) {
+            setTimeout(() => { msgs.scrollTop = msgs.scrollHeight; }, 30);
+          }
         }
         finalText = full;
       },
@@ -450,7 +452,7 @@ function injectQuickSuggestions(containerId, inputId) {
   });
 
   msgs.appendChild(row);
-  msgs.scrollTop = msgs.scrollHeight;
+  setTimeout(() => { msgs.scrollTop = msgs.scrollHeight; }, 50);
 }
 
 function initChatUI() {
