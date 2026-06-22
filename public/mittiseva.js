@@ -480,8 +480,8 @@ async function submitAuth() {
     }
 
     await checkAuthSession();
-    // After auth, go to the form if not already logged-in view
-    if (currentUser) showPage('form');
+    // After auth, go to the landing page if successfully logged in
+    if (currentUser) showPage('landing');
 
   } catch (e) {
     // Safely extract error message from any format (string, Error obj, Supabase AuthError, etc.)
