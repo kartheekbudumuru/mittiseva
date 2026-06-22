@@ -56,8 +56,6 @@ const TRANSLATIONS = {
     'btn-view-past': 'View My Past Tests',
     'btn-chat-home-lbl': 'Krishi AI',
     'btn-login-reg': 'Login',
-    'authTitle': 'Welcome Back',
-    'authSub': 'Enter your details to continue.',
     'label-name': 'Full Name',
     'label-phone': 'Phone Number',
     'label-village': 'Village / Location',
@@ -145,8 +143,6 @@ const TRANSLATIONS = {
     'btn-view-past': 'నా పాత పరీక్షలు చూడండి',
     'btn-chat-home-lbl': 'కృషి AI',
     'btn-login-reg': 'లాగిన్',
-    'authTitle': 'తిరిగి స్వాగతం',
-    'authSub': 'కొనసాగించడానికి మీ వివరాలను నమోదు చేయండి.',
     'label-name': 'పూర్తి పేరు',
     'label-phone': 'ఫోన్ నంబర్',
     'label-village': 'గ్రామం / ప్రదేశం',
@@ -234,8 +230,6 @@ const TRANSLATIONS = {
     'btn-view-past': 'मेरे पुराने परीक्षण देखें',
     'btn-chat-home-lbl': 'कृषि AI',
     'btn-login-reg': 'लॉगिन',
-    'authTitle': 'वापस स्वागत है',
-    'authSub': 'जारी रखने के लिए अपना विवरण दर्ज करें।',
     'label-name': 'पूरा नाम',
     'label-phone': 'फ़ोन नंबर',
     'label-village': 'गाँव / स्थान',
@@ -320,13 +314,15 @@ function translateUI() {
 // ══ Navigation ══
 function showPage(id) {
   // Route Guard
-  const protectedPages = ['results', 'report', 'dashboard', 'chat', 'form'];
+  const protectedPages = ['results', 'report', 'dashboard', 'chat', 'form', 'landing'];
   if (protectedPages.includes(id) && (!supabase || !currentUser)) {
-    alert(
-      currentLang === 'en' ? 'Please Login or Register to access this feature.' :
-      currentLang === 'te' ? 'దయచేసి ఈ సేవను ఉపయోగించడానికి లాగిన్ లేదా రిజిస్టర్ అవ్వండి.' :
-      'कृपया इस सुविधा का उपयोग करने के लिए लॉगिन या पंजीकरण करें।'
-    );
+    if (id !== 'landing') {
+      alert(
+        currentLang === 'en' ? 'Please Login or Register to access this feature.' :
+        currentLang === 'te' ? 'దయచేసి ఈ సేవను ఉపయోగించడానికి లాగిన్ లేదా రిజిస్టర్ అవ్వండి.' :
+        'कृपया इस सुविधा का उपयोग करने के लिए लॉगिन या पंजीकरण करें।'
+      );
+    }
     showPage('auth');
     return;
   }
@@ -1397,8 +1393,12 @@ async function saveChatMessage(sender, message) {
 // ── Boot ──
 async function initApp() {
   initForm();
-  showPage('landing');
   await checkAuthSession();
+  if (currentUser) {
+    showPage('landing');
+  } else {
+    showPage('auth');
+  }
   translateUI();
 }
 initApp();
