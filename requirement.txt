@@ -1,0 +1,28 @@
+========================================================================
+PROJECT REQUIREMENTS & TECHNICAL SPECIFICATIONS: MittiSeva (మిట్టిసేవ)
+========================================================================
+
+1. SYSTEM & RUNTIME REQUIREMENTS
+--------------------------------
+* Node.js Runtime: Version 18.x or higher (Recommended: 20.x LTS) to host the backend server.
+* Package Manager: npm (Version 9.x or higher) to manage package dependencies and run script commands.
+* Web Browser: Any modern standard-compliant browser (Google Chrome, Mozilla Firefox, Apple Safari, Microsoft Edge, Opera) with JavaScript enabled.
+* Database & Auth Provider: Supabase Cloud Service hosting PostgreSQL 15+ database and managing secure farmer authentication.
+* Network & Port Configurations: Local API proxy server configured on Port 5000, and local static frontend server configured on Port 8000.
+
+2. TECHNICAL STACK & LIBRARIES
+------------------------------
+* Frontend Structure: Vanilla HTML5 semantic markup, designed mobile-first with desktop layout responsive support.
+* Styling & Presentation: Native CSS3 with responsive viewport adjustments, dark-green forest theme, and print media layout overrides.
+* Core Logic: Vanilla ES6+ JavaScript handling client-side routing, localized translation dictionaries, dashboard charts, and calculator formulas.
+* Libraries & SDKs: Chart.js (v4.4.x) loaded via CDN for history graphs, and Supabase JavaScript SDK (v2) loaded via CDN for database queries.
+* Backend Proxy Stack: Node.js Express server utilizing ES Modules ("type": "module"), CORS, dotenv for configuration, nodemon for reload tracking, and concurrently.
+
+3. FUNCTIONAL CAPABILITIES (MODULES)
+------------------------------------
+* Module 1: Authentication & Profile Gate (virtual email phone login system mapping 10-digit numbers, registration forms, mandatory authentication gate, and profile view).
+* Module 2: Soil Health Calculator (accordion inputs with synchronized numeric fields and sliders for N, P, K, pH, moisture, organic carbon, and dynamic 0-100 score engine).
+* Module 3: Seasonal Crop Advisory (landing page advisory cards proposing Paddy, Groundnut, and Legumes rotation strategies tailored for Andhra Pradesh & Telangana).
+* Module 4: Krishi AI Chat (conversational assistant proxy supporting real-time streaming, suggestions bar, and automated farmer profile and soil context injection).
+* Module 5: Offline/Server Fallback Mode (automatic backend or API connection failure detection switching chat queries into local JS soil readings analyzer and crop summary outputs).
+* Module 6: Soil Health Reports & History (interactive line charts of historical test scores, and downloadable/printable government-style soil health certificates).
